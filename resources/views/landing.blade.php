@@ -3,43 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurikulum OBE</title>
-    <link rel="stylesheet" href="{{ asset('https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css') }}">
-    <img src="{{asset ('storage/app/public/logo ukri.jpg')}}" alt="user">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-        .login-form {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-    </style>
+    <title>Kurikulum UKRI</title>
+    <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
 </head>
 <body>
-    <div class="background">
-        <div class="container">
-            <h1>Universitas Kebangsaan Republik Indonesia</h1>
-            <div class="login-form">
-                <h2>SELAMAT DATANG</h2>
-                <form action="{{ route('login') }}" method="POST">
-                    @csrf
-                    <input type="text" name="username" placeholder="Username" required><br><br>
-                    <input type="password" name="password" placeholder="Password" required><br><br>
-                    <input type="text" name="kode_keamanan" placeholder="Masukkan Kode Keamanan" required><br><br>
-                    <button type="submit">Masuk</button>
-                </form>
+    <header>
+        <div class="header-left">
+            <img src="{{ asset('storage/logo ukri.png') }}" alt="Logo UKRI" class="university-logo">
+            <div class="header-text">
+                <h1>UNIVERSITAS KEBANGSAAN</h1>
+                <p>REPUBLIK INDONESIA</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <nav>
+                <a href="#">Beranda</a>
+                <div class="dropdown">
+                    <a href="#">Fakultas</a>
+                    <div class="dropdown-content">
+                        <a href="https://fti.ukri.ac.id" target="_blank" rel="noopener noreferrer">Fakultas Teknologi Industri</a>
+                        <a href="https://fiksi.ukri.ac.id" target="_blank" rel="noopener noreferrer">Fakultas Ilmu Komputer Dan Sistem Informasi</a>
+                        <a href="https://ftsp.ukri.ac.id" target="_blank" rel="noopener noreferrer">Fakultas Tekni Sipil Dan Perencanaan</a>
+                        <a href="https://fasos.ukri.ac.id" target="_blank" rel="noopener noreferrer">Fakultas Ilmu Sosial Dan Sastra</a>
+                        <a href="https://fe.ukri.ac.id" target="_blank" rel="noopener noreferrer">Fakultas Ekonomi</a>
+                        <a href="https://mipa.ukri.ac.id" target="_blank" rel="noopener noreferrer">Fakultas Matematika Dan Ilmu Pengetahuan Alam</a>
+                        <a href="https://faperta.ukri.ac.id" target="_blank" rel="noopener noreferrer">Fakultas Pertanian</a>
+                    </div>
+                </div>
+                <a href="#">Kontak</a>
+            </nav>
+            <a href="#" class="btn-masuk">Masuk</a>
+        </div>
+    </header>
+
+    <div class="content">
+        <div class="left">
+            <div class="sky">
+                <div class="cloud"></div>
+            </div>
+            <div class="hills">
+                <div class="hill-back"></div>
+                <div class="hill-front"></div>
+            </div>
+            <div class="carousel-dots">
+                <div class="dot active"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        <div class="right">
+            <div class="right-content">
+                <p>(Deskripsi singkat)</p>
             </div>
         </div>
     </div>
