@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('profile_lulusan', function (Blueprint $table) {
-            $table->id();
-            $table->string('kode_pl', 50)->unique();
-            $table->string('profile_lulusan', 255);
+        Schema::create('mst_pl', function (Blueprint $table) {
+            $table->string('id', 4)->primary();
+            $table->string('desk', 255);
             $table->string('unsur', 255)->nullable();
             $table->text('keterangan')->nullable();
-            $table->timestamps();
         });
     }
 
@@ -26,6 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('profile_lulusan');
+        Schema::dropIfExists('mst_pl');
     }
 };
+

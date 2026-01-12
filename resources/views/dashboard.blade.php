@@ -28,9 +28,9 @@
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item">Profile</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item active">Profile Lulusan</a>
+                <a href="{{route('dashboard')}}" class="nav-item active">Profile Lulusan</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item">Capaian Pembelajaran Lulusan</a>
+                <a href="{{route('capaian-lulusan-prodi.index')}}" class="nav-item">Capaian Pembelajaran Lulusan</a>
                 <div class="nav-divider"></div>
                 <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Mata Kuliah</span>
@@ -102,7 +102,7 @@
                                 <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
                             </th>
                             <th>NO</th>
-                            <th>KODE PL</th>
+                            <th>ID</th>
                             <th>PROFILE LULUSAN (PL)</th>
                             <th>UNSUR</th>
                             <th>KETERANGAN</th>
@@ -115,8 +115,8 @@
                                 <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="row-checkbox" onchange="updateButtons()">
                             </td>
                             <td>{{ $index + 1 }}</td>
-                            <td>{{ $item->kode_pl }}</td>
-                            <td>{{ $item->profile_lulusan }}</td>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->desk }}</td>
                             <td>{{ $item->unsur ?? '-' }}</td>
                             <td>{{ $item->keterangan ?? '-' }}</td>
                         </tr>
@@ -146,13 +146,13 @@
                 <input type="hidden" name="id" id="formId">
 
                 <div class="form-group-modal">
-                    <label for="kode_pl">KODE PL <span class="required">*</span></label>
-                    <input type="text" id="kode_pl" name="kode_pl" class="form-input-modal" required>
+                    <label for="id">ID <span class="required">*</span></label>
+                    <input type="text" id="id" name="id" class="form-input-modal" required>
                 </div>
 
                 <div class="form-group-modal">
-                    <label for="profile_lulusan">PROFILE LULUSAN (PL) <span class="required">*</span></label>
-                    <input type="text" id="profile_lulusan" name="profile_lulusan" class="form-input-modal" required>
+                    <label for="desk">PROFILE LULUSAN (PL) <span class="required">*</span></label>
+                    <input type="text" id="desk" name="desk" class="form-input-modal" required>
                 </div>
 
                 <div class="form-group-modal">
@@ -215,7 +215,7 @@
         function openModal(mode) {
             if (mode === 'create') {
                 document.getElementById('modalTitle').textContent = 'Tambah Data';
-                document.getElementById('formData').action = '{{ route("profile-lulusan.store") }}';
+                document.getElementById('formData').action = '{{ route("mst_pl.store") }}';
                 document.getElementById('formMethod').value = 'POST';
                 document.getElementById('formData').reset();
                 document.getElementById('formId').value = '';
@@ -233,8 +233,8 @@
                         document.getElementById('formData').action = `/dashboard/${id}`;
                         document.getElementById('formMethod').value = 'PUT';
                         document.getElementById('formId').value = data.id;
-                        document.getElementById('kode_pl').value = data.kode_pl;
-                        document.getElementById('profile_lulusan').value = data.profile_lulusan;
+                        document.getElementById('id').value = data.id;
+                        document.getElementById('desk').value = data.desk;
                         document.getElementById('unsur').value = data.unsur || '';
                         document.getElementById('keterangan').value = data.keterangan || '';
                         modal.style.display = 'block';
@@ -299,7 +299,7 @@
 
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '/dashboard/delete-multiple';
+            form.action = '{{ route("mst_pl.destroy-multiple") }}';
 
             const csrfInput = document.createElement('input');
             csrfInput.type = 'hidden';
@@ -307,27 +307,13 @@
             csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
             form.appendChild(csrfInput);
 
-            if (checkboxes.length === 1) {
-                form.action = `/dashboard/${checkboxes[0].value}`;
-                const methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                methodInput.value = 'DELETE';
-                form.appendChild(methodInput);
-            } else {
-                checkboxes.forEach(checkbox => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'ids[]';
-                    input.value = checkbox.value;
-                    form.appendChild(input);
-                });
-                const methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                methodInput.value = 'POST';
-                form.appendChild(methodInput);
-            }
+            checkboxes.forEach(checkbox => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = checkbox.value;
+                form.appendChild(input);
+            });
 
             document.body.appendChild(form);
             form.submit();

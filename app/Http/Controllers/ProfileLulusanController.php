@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProfileLulusan;
 use Illuminate\Http\Request;
+use Illuminate\Database\QueryException;
 
 class ProfileLulusanController extends Controller
 {
@@ -12,7 +13,7 @@ class ProfileLulusanController extends Controller
      */
     public function index()
     {
-        $profileLulusan = ProfileLulusan::orderBy('id', 'desk')->get();
+        $profileLulusan = ProfileLulusan::orderBy('id', 'asc')->get();
         return view('dashboard', compact('profileLulusan'));
     }
 
@@ -22,8 +23,8 @@ class ProfileLulusanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_pl' => 'required|string|max:50|unique:profile_lulusan,kode_pl',
-            'profile_lulusan' => 'required|string|max:255',
+            'id' => 'required|string|max:50|unique:mst_pl,id',
+            'desk' => 'required|string|max:255',
             'unsur' => 'nullable|string|max:255',
             'keterangan' => 'nullable|string',
         ]);
@@ -47,8 +48,8 @@ class ProfileLulusanController extends Controller
     public function update(Request $request, ProfileLulusan $profileLulusan)
     {
         $request->validate([
-            'kode_pl' => 'required|string|max:50|unique:profile_lulusan,kode_pl,' . $profileLulusan->id,
-            'profile_lulusan' => 'required|string|max:255',
+            'id' => 'required|string|max:50|unique:mst_pl,id,' . $profileLulusan->id,
+            'desk' => 'required|string|max:255',
             'unsur' => 'nullable|string|max:255',
             'keterangan' => 'nullable|string',
         ]);
@@ -63,9 +64,17 @@ class ProfileLulusanController extends Controller
      */
     public function destroy(ProfileLulusan $profileLulusan)
     {
-        $profileLulusan->delete();
-
-        return redirect()->route('dashboard')->with('success', 'Data berhasil dihapus!');
+        try {
+            $profileLulusan->delete();
+            return redirect()->route('dashboard')->with('success', 'Data berhasil dihapus!');
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), '23503') || str_contains($e->getMessage(), 'foreign key constraint')) {
+                return redirect()->route('dashboard')
+                    ->withErrors(['error' => 'Data tidak dapat dihapus karena masih digunakan di tabel lain (tbl_pl_cpl). Silakan hapus data yang terkait terlebih dahulu.']);
+            }
+            return redirect()->route('dashboard')
+                ->withErrors(['error' => 'Gagal menghapus data: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -75,11 +84,19 @@ class ProfileLulusanController extends Controller
     {
         $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:profile_lulusan,id',
+            'ids.*' => 'exists:mst_pl,id',
         ]);
 
-        ProfileLulusan::whereIn('id', $request->ids)->delete();
-
-        return redirect()->route('dashboard')->with('success', 'Data berhasil dihapus!');
+        try {
+            $deletedCount = ProfileLulusan::whereIn('id', $request->ids)->delete();
+            return redirect()->route('dashboard')->with('success', $deletedCount . ' data berhasil dihapus!');
+        } catch (QueryException $e) {
+            if (str_contains($e->getMessage(), '23503') || str_contains($e->getMessage(), 'foreign key constraint')) {
+                return redirect()->route('dashboard')
+                    ->withErrors(['error' => 'Beberapa data tidak dapat dihapus karena masih digunakan di tabel lain (tbl_pl_cpl). Silakan hapus data yang terkait terlebih dahulu.']);
+            }
+            return redirect()->route('dashboard')
+                ->withErrors(['error' => 'Gagal menghapus data: ' . $e->getMessage()]);
+        }
     }
 }

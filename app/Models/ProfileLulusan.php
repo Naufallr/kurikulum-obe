@@ -9,11 +9,16 @@ class ProfileLulusan extends Model
 {
     use HasFactory;
 
-    protected $table = 'profile_lulusan';
+    protected $table = 'mst_pl';
+
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    public $timestamps = false;
 
     protected $fillable = [
-        'kode_pl',
-        'profile_lulusan',
+        'id',
+        'desk',
         'unsur',
         'keterangan',
     ];
