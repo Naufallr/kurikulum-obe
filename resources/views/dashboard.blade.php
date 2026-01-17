@@ -32,7 +32,7 @@
                 <div class="nav-divider"></div>
                 <a href="{{route('capaian-lulusan-prodi.index')}}" class="nav-item">Capaian Pembelajaran Lulusan</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
+                <a href="{{route('mata-kuliah.index')}}" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Mata Kuliah</span>
                     <i class="fas fa-chevron-right"></i>
                 </a>

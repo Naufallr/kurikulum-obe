@@ -23,24 +23,14 @@ class CapaianLulusanProdiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id' => 'required|string|max:5|unique:mst_cplp,id',
             'desk' => 'required|string|unique:mst_cplp,desk',
+            'id' => 'nullable|string|max:5',
             'aspek' => 'nullable|string|max:255',
         ]);
 
-        try {
-            CapaianLulusanProdi::create($request->all());
-            return redirect()->route('capaian-lulusan-prodi.index')->with('success', 'Data berhasil ditambahkan!');
-        } catch (QueryException $e) {
-            if (str_contains($e->getMessage(), '23505') || str_contains($e->getMessage(), 'unique constraint')) {
-                return redirect()->route('capaian-lulusan-prodi.index')
-                    ->withErrors(['error' => 'Data dengan deskripsi tersebut sudah ada. Deskripsi CPL harus unik.'])
-                    ->withInput();
-            }
-            return redirect()->route('capaian-lulusan-prodi.index')
-                ->withErrors(['error' => 'Gagal menambahkan data: ' . $e->getMessage()])
-                ->withInput();
-        }
+        CapaianLulusanProdi::create($request->all());
+
+        return redirect()->route('capaian-lulusan-prodi.index')->with('success', 'Data berhasil ditambahkan!');
     }
 
     /**
@@ -57,24 +47,14 @@ class CapaianLulusanProdiController extends Controller
     public function update(Request $request, CapaianLulusanProdi $capaianLulusanProdi)
     {
         $request->validate([
-            'id' => 'required|string|max:5|unique:mst_cplp,id,' . $capaianLulusanProdi->id,
-            'desk' => 'required|string|unique:mst_cplp,desk,' . $capaianLulusanProdi->id . ',id',
+            'desk' => 'required|string|unique:mst_cplp,desk,' . $capaianLulusanProdi->desk,
+            'id' => 'nullable|string|max:5',
             'aspek' => 'nullable|string|max:255',
         ]);
 
-        try {
-            $capaianLulusanProdi->update($request->all());
-            return redirect()->route('capaian-lulusan-prodi.index')->with('success', 'Data berhasil diupdate!');
-        } catch (QueryException $e) {
-            if (str_contains($e->getMessage(), '23505') || str_contains($e->getMessage(), 'unique constraint')) {
-                return redirect()->route('capaian-lulusan-prodi.index')
-                    ->withErrors(['error' => 'Data dengan deskripsi tersebut sudah ada. Deskripsi CPL harus unik.'])
-                    ->withInput();
-            }
-            return redirect()->route('capaian-lulusan-prodi.index')
-                ->withErrors(['error' => 'Gagal mengupdate data: ' . $e->getMessage()])
-                ->withInput();
-        }
+        $capaianLulusanProdi->update($request->all());
+
+        return redirect()->route('capaian-lulusan-prodi.index')->with('success', 'Data berhasil diupdate!');
     }
 
     /**

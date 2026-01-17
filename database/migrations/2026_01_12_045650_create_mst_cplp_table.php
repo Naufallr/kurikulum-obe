@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('mst_cplp', function (Blueprint $table) {
-            $table->string('id', 5)->primary();
-            $table->text('desk');
+            $table->string('id', 5);
+            $table->text('desk')->primary();
             $table->string('aspek', 255)->nullable();
         });
     }
