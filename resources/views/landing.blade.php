@@ -32,7 +32,7 @@
                 </div>
                 <a href="#">Kontak</a>
             </nav>
-            <a href="#" class="btn-masuk">Masuk</a>
+            <a href="/login" class="btn-masuk">Masuk</a>
         </div>
     </header>
 
