@@ -24,9 +24,10 @@ class MataKuliahController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id' => 'required|string|max:20,kode',
+            'id' => 'required|string|max:10',
             'nama_mk' => 'required|string|max:255|unique:mst_mk,nama_mk',
-            'sks' => 'required|integer|min:1',
+            'jenis_mk' => 'required|string|max:255',
+            'status' => 'required|string|max:30',
         ]);
 
         MataKuliah::create($request->all());
@@ -48,8 +49,9 @@ class MataKuliahController extends Controller
     public function update(Request $request, MataKuliah $mataKuliah)
     {
         $request->validate([
-            'id' => 'required|string|max:20',
-            'nama_mk' => 'required|string|max:255|unique:mst_mk,nama_mk,' . $mataKuliah->nama_mk,
+            'id' => 'required|string|max:10',
+            // abaikan record yang sedang diedit (PK = nama_mk)
+            'nama_mk' => 'required|string|max:255|unique:mst_mk,nama_mk,' . $mataKuliah->nama_mk . ',nama_mk',
             'jenis_mk' => 'required|string|max:255',
             'status' => 'required|string|max:30',
         ]);
@@ -84,11 +86,12 @@ class MataKuliahController extends Controller
     {
         $request->validate([
             'ids' => 'required|array',
-            'ids.*' => 'exists:mata_kuliah,id',
+            // PK mst_mk adalah nama_mk
+            'ids.*' => 'exists:mst_mk,nama_mk',
         ]);
 
         try {
-            $deletedCount = MataKuliah::whereIn('id', $request->ids)->delete();
+            $deletedCount = MataKuliah::whereIn('nama_mk', $request->ids)->delete();
             return redirect()->route('mata-kuliah.index')->with('success', $deletedCount . ' data berhasil dihapus!');
         } catch (QueryException $e) {
             if (str_contains($e->getMessage(), '23503') || str_contains($e->getMessage(), 'foreign key constraint')) {

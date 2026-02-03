@@ -32,17 +32,20 @@
                 <div class="nav-divider"></div>
                 <a href="{{ route('capaian-lulusan-prodi.index') }}" class="nav-item active">Capaian Pembelajaran Lulusan</a>
                 <div class="nav-divider"></div>
-                <a href="{{route('mata-kuliah.index')}}" class="nav-item collapsible" onclick="toggleSubmenu(event)">
-                    <span>Mata Kuliah</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
+                <a href="{{ route('bahan-kajian.index') }}" class="nav-item">Bahan Kajian</a>
+                <div class="nav-divider"></div>
+                <a href="{{route('mata-kuliah.index')}}" class="nav-item">Mata Kuliah</a>
+                <div class="nav-divider"></div>
+                <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
+                <div class="nav-divider"></div>
+                <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item">Sub-CPMK</a>
                 <div class="nav-divider"></div>
                 <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
                     <span>Penilaian</span>
                     <i class="fas fa-chevron-down"></i>
                 </a>
                 <div class="submenu active">
-                    <a href="#" class="nav-item submenu-item">Teknik Penilaian</a>
+                    <a href="{{route('tahap-mekanisme-penilaian.index')}}" class="nav-item submenu-item">Teknik Penilaian</a>
                     <a href="#" class="nav-item submenu-item">Bobot Penilaian</a>
                 </div>
             </nav>

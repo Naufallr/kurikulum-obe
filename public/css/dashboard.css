@@ -231,6 +231,42 @@ body {
     margin-bottom: 25px;
 }
 
+/* Toolbar (filter + action buttons) */
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.toolbar .action-buttons {
+    margin-bottom: 0;
+}
+
+.filters {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    min-width: 120px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #A50000;
+    box-shadow: 0 0 0 3px rgba(165, 0, 0, 0.1);
+}
+
 .btn-action {
     border: none;
     padding: 10px 20px;

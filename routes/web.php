@@ -1,17 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MataKuliahController;
+use App\Http\Controllers\BahanKajianController;
 use App\Http\Controllers\ProfileLulusanController;
 use App\Http\Controllers\CapaianLulusanProdiController;
-use App\Http\Controllers\MataKuliahController;
+use App\Http\Controllers\PemetaanCplCpmkMkController;
+use App\Http\Controllers\PemetaanSubcpmkController;
+use App\Http\Controllers\TahapMekanismeController;
 
 Route::get('/landing', function () {
     return view('landing');
 });
 
-Route::get('/login', function () {
-    return view('login');
-});
+Route::match(['get', 'post'], '/login', [AuthController::class, 'login'])->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/dashboard', [ProfileLulusanController::class, 'index'])->name('dashboard');
 Route::post('/dashboard', [ProfileLulusanController::class, 'store'])->name('mst_pl.store');
@@ -27,8 +31,37 @@ Route::put('/capaian-lulusan-prodi/{capaianLulusanProdi}', [CapaianLulusanProdiC
 Route::delete('/capaian-lulusan-prodi/{capaianLulusanProdi}', [CapaianLulusanProdiController::class, 'destroy'])->name('capaian-lulusan-prodi.destroy');
 Route::post('/capaian-lulusan-prodi/delete-multiple', [CapaianLulusanProdiController::class, 'destroyMultiple'])->name('capaian-lulusan-prodi.destroy-multiple');
 
+Route::get('/bahan-kajian', [BahanKajianController::class, 'index'])->name('bahan-kajian.index');
+Route::post('/bahan-kajian', [BahanKajianController::class, 'store'])->name('bahan-kajian.store');
+Route::get('/bahan-kajian/{bahanKajian}', [BahanKajianController::class, 'show'])->name('bahan-kajian.show');
+Route::put('/bahan-kajian/{bahanKajian}', [BahanKajianController::class, 'update'])->name('bahan-kajian.update');
+Route::delete('/bahan-kajian/{bahanKajian}', [BahanKajianController::class, 'destroy'])->name('bahan-kajian.destroy');
+Route::post('/bahan-kajian/delete-multiple', [BahanKajianController::class, 'destroyMultiple'])->name('bahan-kajian.destroy-multiple');
+
 Route::get('/mata-kuliah', [MataKuliahController::class, 'index'])->name('mata-kuliah.index');
 route::post('/mata-kuliah',[MataKuliahController::class,'store'])->name('mata-kuliah.store');
 route::get('/mata-kuliah/{mataKuliah}',[MataKuliahController::class,'show'])->name('mata-kuliah.show');
 route::put('/mata-kuliah/{mataKuliah}',[MataKuliahController::class,'update'])->name('mata-kuliah.update');
 route::delete('/mata-kuliah/{mataKuliah}',[MataKuliahController::class,'destroy'])->name('mata-kuliah.destroy');
+route::post('/mata-kuliah/delete-multiple', [MataKuliahController::class, 'destroyMultiple'])->name('mata-kuliah.destroy-multiple');
+
+Route::get('/pemetaan-cpl-cpmk-mk', [PemetaanCplCpmkMkController::class, 'index'])->name('pemetaan-cpl-cpmk-mk.index');
+Route::post('/pemetaan-cpl-cpmk-mk', [PemetaanCplCpmkMkController::class, 'store'])->name('pemetaan-cpl-cpmk-mk.store');
+Route::get('/pemetaan-cpl-cpmk-mk/{pemetaanCplCpmkMk}', [PemetaanCplCpmkMkController::class, 'show'])->name('pemetaan-cpl-cpmk-mk.show');
+Route::put('/pemetaan-cpl-cpmk-mk/{pemetaanCplCpmkMk}', [PemetaanCplCpmkMkController::class, 'update'])->name('pemetaan-cpl-cpmk-mk.update');
+Route::delete('/pemetaan-cpl-cpmk-mk/{pemetaanCplCpmkMk}', [PemetaanCplCpmkMkController::class, 'destroy'])->name('pemetaan-cpl-cpmk-mk.destroy');
+Route::post('/pemetaan-cpl-cpmk-mk/delete-multiple', [PemetaanCplCpmkMkController::class, 'destroyMultiple'])->name('pemetaan-cpl-cpmk-mk.destroy-multiple');
+
+Route::get('/pemetaan-subcpmk', [PemetaanSubcpmkController::class, 'index'])->name('pemetaan-subcpmk.index');
+Route::post('/pemetaan-subcpmk', [PemetaanSubcpmkController::class, 'store'])->name('pemetaan-subcpmk.store');
+Route::get('/pemetaan-subcpmk/{pemetaanSubcpmk}', [PemetaanSubcpmkController::class, 'show'])->name('pemetaan-subcpmk.show');
+Route::put('/pemetaan-subcpmk/{pemetaanSubcpmk}', [PemetaanSubcpmkController::class, 'update'])->name('pemetaan-subcpmk.update');
+Route::delete('/pemetaan-subcpmk/{pemetaanSubcpmk}', [PemetaanSubcpmkController::class, 'destroy'])->name('pemetaan-subcpmk.destroy');
+Route::post('/pemetaan-subcpmk/delete-multiple', [PemetaanSubcpmkController::class, 'destroyMultiple'])->name('pemetaan-subcpmk.destroy-multiple');
+
+Route::get('/tahap-mekanisme-penilaian', [TahapMekanismeController::class, 'index'])->name('tahap-mekanisme-penilaian.index');
+Route::post('/tahap-mekanisme-penilaian', [TahapMekanismeController::class, 'store'])->name('tahap-mekanisme-penilaian.store');
+Route::get('/tahap-mekanisme-penilaian/{tahapMekanisme}', [TahapMekanismeController::class, 'show'])->name('tahap-mekanisme-penilaian.show');
+Route::put('/tahap-mekanisme-penilaian/{tahapMekanisme}', [TahapMekanismeController::class, 'update'])->name('tahap-mekanisme-penilaian.update');
+Route::delete('/tahap-mekanisme-penilaian/{tahapMekanisme}', [TahapMekanismeController::class, 'destroy'])->name('tahap-mekanisme-penilaian.destroy');
+Route::post('/tahap-mekanisme-penilaian/delete-multiple', [TahapMekanismeController::class, 'destroyMultiple'])->name('tahap-mekanisme-penilaian.destroy-multiple');
