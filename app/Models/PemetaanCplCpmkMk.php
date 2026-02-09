@@ -24,4 +24,9 @@ class PemetaanCplCpmkMk extends Model
         'desk_cpmk',
         'id_mk',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'desk_cpmk';
+    }
 }

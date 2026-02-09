@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,22 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="btn-keluar">Keluar</button>
+            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+                @csrf
+                <button type="submit" class="btn-keluar">Keluar</button>
+            </form>
+            <div class="user-info user-info--header">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name">Naufal Maulana</div>
+                    <div class="user-id">20231320044</div>
+                </div>
+                <div class="user-settings">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -26,8 +41,6 @@
         <!-- Left Sidebar -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item">Profile</a>
-                <div class="nav-divider"></div>
                 <a href="{{ route('dashboard') }}" class="nav-item">Profile Lulusan</a>
                 <div class="nav-divider"></div>
                 <a href="{{ route('capaian-lulusan-prodi.index') }}" class="nav-item active">Capaian Pembelajaran Lulusan</a>
@@ -40,30 +53,32 @@
                 <div class="nav-divider"></div>
                 <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item">Sub-CPMK</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Penilaian</span>
-                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-right"></i>
                 </a>
-                <div class="submenu active">
+                <div class="submenu">
                     <a href="{{route('tahap-mekanisme-penilaian.index')}}" class="nav-item submenu-item">Teknik Penilaian</a>
-                    <a href="#" class="nav-item submenu-item">Bobot Penilaian</a>
+                    <a href="{{route('bobot-penilaian.index')}}" class="nav-item submenu-item">Bobot Penilaian</a>
+                </div>
+                <div class="nav-divider"></div>
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
+                    <span>Pemetaan</span>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                <div class="submenu">
+                    <a href="{{ route('pemetaan-cpl-pl.index') }}" class="nav-item submenu-item">CPL-PL</a>
+                    <a href="{{ route('pemetaan-cpl-bk.index') }}" class="nav-item submenu-item">CPL-BK</a>
+                    <a href="{{ route('pemetaan-bk-mk.index') }}" class="nav-item submenu-item">BK-MK</a>
+                    <a href="{{ route('pemetaan-cpl-mk.index') }}" class="nav-item submenu-item">CPL-MK</a>
+                    <a href="{{ route('pemetaan-cpl-bk-mk.index') }}" class="nav-item submenu-item">CPL-BK-MK</a>
+                    <a href="{{ route('organisasi-mata-kuliah.index') }}" class="nav-item submenu-item">Organisasi Mata Kuliah (OMK)</a>
+                    <a href="{{ route('peta-pemenuhan-cpl.index') }}" class="nav-item submenu-item">Peta Pemenuhan CPL</a>
+                    <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item submenu-item">Pemetaan CPL-CPMK-MK</a>
+                    <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item submenu-item">Pemetaan MK-CPMK-SubCPMK</a>
                 </div>
             </nav>
-
-            <!-- User Info at Bottom -->
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-details">
-                    <div class="user-name">Naufal Maulana</div>
-                    <div class="user-id">20231320044</div>
-                </div>
-                <div class="user-settings">
-                    <i class="fas fa-cog"></i>
-                </div>
-            </div>
-        </aside>
+</aside>
 
         <!-- Main Content Area -->
         <main class="main-content">
@@ -147,7 +162,7 @@
                 <input type="hidden" name="id" id="formId">
 
                 <div class="form-group-modal">
-                    <label for="id">KODE CPL <span class="required">*</span></label>
+                    <label for="id">KODE CPL <span class="re32uired">*</span></label>
                     <input type="text" id="id" name="id" class="form-input-modal" required>
                 </div>
 
@@ -356,3 +371,4 @@
     </script>
 </body>
 </html>
+

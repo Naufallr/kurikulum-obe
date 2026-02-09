@@ -23,8 +23,8 @@ class CapaianLulusanProdiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'id' => 'required|string|max:5|unique:mst_cplp,id',
             'desk' => 'required|string|unique:mst_cplp,desk',
-            'id' => 'nullable|string|max:5',
             'aspek' => 'nullable|string|max:255',
         ]);
 
@@ -47,8 +47,8 @@ class CapaianLulusanProdiController extends Controller
     public function update(Request $request, CapaianLulusanProdi $capaianLulusanProdi)
     {
         $request->validate([
+            'id' => 'required|string|max:5|unique:mst_cplp,id,' . $capaianLulusanProdi->id . ',id',
             'desk' => 'required|string|unique:mst_cplp,desk,' . $capaianLulusanProdi->desk,
-            'id' => 'nullable|string|max:5',
             'aspek' => 'nullable|string|max:255',
         ]);
 

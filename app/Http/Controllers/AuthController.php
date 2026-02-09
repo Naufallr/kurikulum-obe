@@ -1,12 +1,9 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -32,48 +29,12 @@ class AuthController extends Controller
         ]);
 
         try {
-            // Find user by name field first to check if user exists
-            $user = User::where('name', $validated['username'])->first();
+            $credentials = [
+                'name' => $validated['username'],
+                'password' => $validated['password'],
+            ];
 
-            if (!$user) {
-                return back()->withErrors([
-                    'login' => 'Username atau password salah.',
-                ])->withInput($request->except('password'));
-            }
-
-            // Get raw password from database (bypass 'hashed' cast)
-            // The User model has 'password' => 'hashed' cast, so we need to get the raw value
-            $storedPassword = $user->getRawOriginal('password');
-
-            // Check if password exists
-            if (empty($storedPassword)) {
-                Log::error('User has no password', ['user_id' => $user->id]);
-                return back()->withErrors([
-                    'login' => 'Akun tidak valid. Silakan hubungi administrator.',
-                ])->withInput($request->except('password'));
-            }
-
-            // Check if password is already hashed (bcrypt starts with $2y$)
-            $isPasswordHashed = str_starts_with($storedPassword, '$2y$') || str_starts_with($storedPassword, '$2a$') || str_starts_with($storedPassword, '$2b$');
-
-            $passwordValid = false;
-
-            if ($isPasswordHashed) {
-                // Password is hashed, use Hash::check
-                $passwordValid = Hash::check($validated['password'], $storedPassword);
-            } else {
-                // Password is plain text, compare directly
-                $passwordValid = $validated['password'] === $storedPassword;
-            }
-
-            if ($passwordValid) {
-                // If password was plain text, hash it and save to database
-                if (!$isPasswordHashed) {
-                    $user->password = Hash::make($validated['password']);
-                    $user->save();
-                }
-
-                Auth::login($user, $request->boolean('remember'));
+            if (Auth::attempt($credentials, $request->boolean('remember'))) {
                 $request->session()->regenerate();
                 return redirect()->intended('/dashboard')->with('success', 'Login berhasil!');
             }
@@ -82,9 +43,8 @@ class AuthController extends Controller
                 'login' => 'Username atau password salah.',
             ])->withInput($request->except('password'));
         } catch (\Exception $e) {
-            // Log the error for debugging
             Log::error('Login error: ' . $e->getMessage(), [
-                'username' => $validated['username'] ?? 'unknown',
+                'login' => $validated['username'] ?? 'unknown',
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()

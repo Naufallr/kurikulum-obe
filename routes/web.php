@@ -6,9 +6,17 @@ use App\Http\Controllers\MataKuliahController;
 use App\Http\Controllers\BahanKajianController;
 use App\Http\Controllers\ProfileLulusanController;
 use App\Http\Controllers\CapaianLulusanProdiController;
+use App\Http\Controllers\PemetaanCplPlController;
+use App\Http\Controllers\PemetaanCplBkController;
+use App\Http\Controllers\PemetaanBkMkController;
+use App\Http\Controllers\PemetaanCplMkController;
+use App\Http\Controllers\PemetaanCplBkMkController;
+use App\Http\Controllers\OrganisasiMataKuliahController;
+use App\Http\Controllers\PetaPemenuhanCplController;
 use App\Http\Controllers\PemetaanCplCpmkMkController;
 use App\Http\Controllers\PemetaanSubcpmkController;
 use App\Http\Controllers\TahapMekanismeController;
+use App\Http\Controllers\BobotPenilaianController;
 
 Route::get('/landing', function () {
     return view('landing');
@@ -30,6 +38,19 @@ Route::get('/capaian-lulusan-prodi/{capaianLulusanProdi}', [CapaianLulusanProdiC
 Route::put('/capaian-lulusan-prodi/{capaianLulusanProdi}', [CapaianLulusanProdiController::class, 'update'])->name('capaian-lulusan-prodi.update');
 Route::delete('/capaian-lulusan-prodi/{capaianLulusanProdi}', [CapaianLulusanProdiController::class, 'destroy'])->name('capaian-lulusan-prodi.destroy');
 Route::post('/capaian-lulusan-prodi/delete-multiple', [CapaianLulusanProdiController::class, 'destroyMultiple'])->name('capaian-lulusan-prodi.destroy-multiple');
+
+Route::get('/pemetaan-cpl-pl', [PemetaanCplPlController::class, 'index'])->name('pemetaan-cpl-pl.index');
+Route::post('/pemetaan-cpl-pl', [PemetaanCplPlController::class, 'store'])->name('pemetaan-cpl-pl.store');
+Route::get('/pemetaan-cpl-bk', [PemetaanCplBkController::class, 'index'])->name('pemetaan-cpl-bk.index');
+Route::post('/pemetaan-cpl-bk', [PemetaanCplBkController::class, 'store'])->name('pemetaan-cpl-bk.store');
+Route::get('/pemetaan-bk-mk', [PemetaanBkMkController::class, 'index'])->name('pemetaan-bk-mk.index');
+Route::post('/pemetaan-bk-mk', [PemetaanBkMkController::class, 'store'])->name('pemetaan-bk-mk.store');
+Route::get('/pemetaan-cpl-mk', [PemetaanCplMkController::class, 'index'])->name('pemetaan-cpl-mk.index');
+Route::post('/pemetaan-cpl-mk', [PemetaanCplMkController::class, 'store'])->name('pemetaan-cpl-mk.store');
+Route::get('/pemetaan-cpl-bk-mk', [PemetaanCplBkMkController::class, 'index'])->name('pemetaan-cpl-bk-mk.index');
+Route::post('/pemetaan-cpl-bk-mk', [PemetaanCplBkMkController::class, 'store'])->name('pemetaan-cpl-bk-mk.store');
+Route::get('/organisasi-mata-kuliah', [OrganisasiMataKuliahController::class, 'index'])->name('organisasi-mata-kuliah.index');
+Route::get('/peta-pemenuhan-cpl', [PetaPemenuhanCplController::class, 'index'])->name('peta-pemenuhan-cpl.index');
 
 Route::get('/bahan-kajian', [BahanKajianController::class, 'index'])->name('bahan-kajian.index');
 Route::post('/bahan-kajian', [BahanKajianController::class, 'store'])->name('bahan-kajian.store');
@@ -65,3 +86,10 @@ Route::get('/tahap-mekanisme-penilaian/{tahapMekanisme}', [TahapMekanismeControl
 Route::put('/tahap-mekanisme-penilaian/{tahapMekanisme}', [TahapMekanismeController::class, 'update'])->name('tahap-mekanisme-penilaian.update');
 Route::delete('/tahap-mekanisme-penilaian/{tahapMekanisme}', [TahapMekanismeController::class, 'destroy'])->name('tahap-mekanisme-penilaian.destroy');
 Route::post('/tahap-mekanisme-penilaian/delete-multiple', [TahapMekanismeController::class, 'destroyMultiple'])->name('tahap-mekanisme-penilaian.destroy-multiple');
+
+Route::get('/bobot-penilaian', [BobotPenilaianController::class, 'index'])->name('bobot-penilaian.index');
+Route::post('/bobot-penilaian', [BobotPenilaianController::class, 'store'])->name('bobot-penilaian.store');
+Route::get('/bobot-penilaian/get-data/{bobotPenilaian}', [BobotPenilaianController::class, 'show'])->name('bobot-penilaian.show');
+Route::put('/bobot-penilaian/{bobotPenilaian}', [BobotPenilaianController::class, 'update'])->name('bobot-penilaian.update');
+Route::delete('/bobot-penilaian/{bobotPenilaian}', [BobotPenilaianController::class, 'destroy'])->name('bobot-penilaian.destroy');
+Route::post('/bobot-penilaian/delete-multiple', [BobotPenilaianController::class, 'destroyMultiple'])->name('bobot-penilaian.destroy-multiple');

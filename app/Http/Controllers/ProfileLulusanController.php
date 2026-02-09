@@ -23,7 +23,7 @@ class ProfileLulusanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id' => 'required|string|max:50',
+            'id' => 'required|string|max:4|unique:mst_pl,id',
             'desk' => 'required|string|max:255|unique:mst_pl,desk',
             'unsur' => 'nullable|string|max:255',
             'keterangan' => 'nullable|string',
@@ -48,7 +48,7 @@ class ProfileLulusanController extends Controller
     public function update(Request $request, ProfileLulusan $profileLulusan)
     {
         $request->validate([
-            'id' => 'required|string|max:50',
+            'id' => 'required|string|max:4|unique:mst_pl,id,' . $profileLulusan->id . ',id',
             'desk' => 'required|string|max:255|unique:mst_pl,desk,'. $profileLulusan->desk,
             'unsur' => 'nullable|string|max:255',
             'keterangan' => 'nullable|string',

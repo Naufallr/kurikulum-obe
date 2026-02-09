@@ -85,8 +85,7 @@ class BahanKajianController extends Controller
     {
         $request->validate([
             'ids' => 'required|array',
-            // PK mst_mk adalah nama_mk
-            'ids.*' => 'exists:table_bk,id',
+            'ids.*' => 'exists:mst_bk,id',
         ]);
 
         try {
