@@ -6,9 +6,24 @@ use App\Models\TahapMekanisme;
 use App\Models\PemetaanCplCpmkMk;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TahapMekanismeController extends Controller
 {
+    /**
+     * Sinkronkan bobot_mk untuk semua baris dengan kombinasi CPL+MK yang sama.
+     */
+    private function syncBobotMkByCplMk(string $idCpl, string $idMk): void
+    {
+        $totalBobot = TahapMekanisme::where('id_cpl', $idCpl)
+            ->where('id_mk', $idMk)
+            ->sum('bobot');
+
+        TahapMekanisme::where('id_cpl', $idCpl)
+            ->where('id_mk', $idMk)
+            ->update(['bobot_mk' => $totalBobot]);
+    }
+
     /**
      * Tampilkan daftar Tahap Mekanisme Penilaian.
      */
@@ -36,15 +51,22 @@ class TahapMekanismeController extends Controller
         $request->validate([
             'id_cpl' => 'required|string|max:10',
             'id_mk' => 'required|string|max:10',
-            'id_cpmk' => 'required|string|max:10',
+            'id_cpmk' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::exists('tbl_pemetaan_cpl_cpmk_mk', 'id_cpmk')->where(function ($query) use ($request) {
+                    $query->where('id_cpl', $request->id_cpl)
+                        ->where('id_mk', $request->id_mk);
+                }),
+            ],
             'tahap_penilaian' => 'required|string|max:255',
             'teknik_penilaian' => 'required|string|max:255',
             'instrumen' => 'required|string|max:255',
             'kriteria' => 'required|string|max:255',
-            'bobot' => 'required|numeric',
+            'bobot' => 'required|numeric|min:0',
         ]);
 
-        // Hitung bobot_mk sebagai total bobot untuk kombinasi CPL+MK+CPMK yang sama
         $data = $request->only([
             'id_cpl',
             'id_mk',
@@ -59,16 +81,8 @@ class TahapMekanismeController extends Controller
         // Simpan record baru
         $tahap = TahapMekanisme::create($data);
 
-        // Recalculate total bobot untuk kombinasi yang sama dan simpan ke semua baris terkait
-        $totalBobot = TahapMekanisme::where('id_cpl', $tahap->id_cpl)
-            ->where('id_mk', $tahap->id_mk)
-            ->where('id_cpmk', $tahap->id_cpmk)
-            ->sum('bobot');
-
-        TahapMekanisme::where('id_cpl', $tahap->id_cpl)
-            ->where('id_mk', $tahap->id_mk)
-            ->where('id_cpmk', $tahap->id_cpmk)
-            ->update(['bobot_mk' => $totalBobot]);
+        // Bobot MK = SUM bobot untuk kombinasi CPL+MK yang sama
+        $this->syncBobotMkByCplMk($tahap->id_cpl, $tahap->id_mk);
 
         return redirect()->route('tahap-mekanisme-penilaian.index')->with('success', 'Data mekanisme penilaian berhasil ditambahkan!');
     }
@@ -91,7 +105,7 @@ class TahapMekanismeController extends Controller
             'teknik_penilaian' => 'required|string|max:255',
             'instrumen' => 'required|string|max:255',
             'kriteria' => 'required|string|max:255',
-            'bobot' => 'required|numeric',
+            'bobot' => 'required|numeric|min:0',
         ]);
 
         // CPL/MK/CPMK dianggap tetap (tidak diedit dari halaman ini)
@@ -103,16 +117,8 @@ class TahapMekanismeController extends Controller
             'bobot',
         ]));
 
-        // Recalculate total bobot untuk kombinasi CPL+MK+CPMK yang sama
-        $totalBobot = TahapMekanisme::where('id_cpl', $tahapMekanisme->id_cpl)
-            ->where('id_mk', $tahapMekanisme->id_mk)
-            ->where('id_cpmk', $tahapMekanisme->id_cpmk)
-            ->sum('bobot');
-
-        TahapMekanisme::where('id_cpl', $tahapMekanisme->id_cpl)
-            ->where('id_mk', $tahapMekanisme->id_mk)
-            ->where('id_cpmk', $tahapMekanisme->id_cpmk)
-            ->update(['bobot_mk' => $totalBobot]);
+        // Bobot MK = SUM bobot untuk kombinasi CPL+MK yang sama
+        $this->syncBobotMkByCplMk($tahapMekanisme->id_cpl, $tahapMekanisme->id_mk);
 
         return redirect()->route('tahap-mekanisme-penilaian.index')
             ->with('success', 'Data mekanisme penilaian berhasil diupdate!');
@@ -125,25 +131,15 @@ class TahapMekanismeController extends Controller
     public function destroy(TahapMekanisme $tahapMekanisme)
     {
         try {
-            // Simpan kombinasi CPL+MK+CPMK untuk recalculasi bobot_mk setelah delete
+            // Simpan kombinasi CPL+MK untuk recalculasi bobot_mk setelah delete
             $idCpl = $tahapMekanisme->id_cpl;
             $idMk = $tahapMekanisme->id_mk;
-            $idCpmk = $tahapMekanisme->id_cpmk;
 
             // Hapus hanya satu baris ini
             $tahapMekanisme->delete();
 
-            // Recalculate total bobot untuk kombinasi CPL+MK+CPMK yang sama
-            $totalBobot = TahapMekanisme::where('id_cpl', $idCpl)
-                ->where('id_mk', $idMk)
-                ->where('id_cpmk', $idCpmk)
-                ->sum('bobot');
-
-            // Update bobot_mk di semua baris yang masih tersisa untuk kombinasi ini
-            TahapMekanisme::where('id_cpl', $idCpl)
-                ->where('id_mk', $idMk)
-                ->where('id_cpmk', $idCpmk)
-                ->update(['bobot_mk' => $totalBobot]);
+            // Bobot MK = SUM bobot untuk kombinasi CPL+MK yang sama
+            $this->syncBobotMkByCplMk($idCpl, $idMk);
 
             return redirect()->route('tahap-mekanisme-penilaian.index')
                 ->with('success', 'Satu data mekanisme penilaian berhasil dihapus!');
@@ -164,34 +160,25 @@ class TahapMekanismeController extends Controller
         ]);
 
         try {
-            // Ambil dulu kombinasi CPL+MK+CPMK dari baris yang akan dihapus
+            // Ambil dulu kombinasi CPL+MK dari baris yang akan dihapus
             $rows = TahapMekanisme::whereIn('id', $request->ids)
-                ->get(['id_cpl', 'id_mk', 'id_cpmk']);
+                ->get(['id_cpl', 'id_mk']);
 
             // Hapus baris-baris yang dipilih berdasarkan primary key "id"
             $deletedCount = TahapMekanisme::whereIn('id', $request->ids)->delete();
 
-            // Untuk setiap kombinasi unik CPL+MK+CPMK, hitung ulang bobot_mk
+            // Untuk setiap kombinasi unik CPL+MK, hitung ulang bobot_mk
             $uniqueCombos = $rows
                 ->map(function ($row) {
                     return [
                         'id_cpl' => $row->id_cpl,
                         'id_mk' => $row->id_mk,
-                        'id_cpmk' => $row->id_cpmk,
                     ];
                 })
                 ->unique();
 
             foreach ($uniqueCombos as $combo) {
-                $totalBobot = TahapMekanisme::where('id_cpl', $combo['id_cpl'])
-                    ->where('id_mk', $combo['id_mk'])
-                    ->where('id_cpmk', $combo['id_cpmk'])
-                    ->sum('bobot');
-
-                TahapMekanisme::where('id_cpl', $combo['id_cpl'])
-                    ->where('id_mk', $combo['id_mk'])
-                    ->where('id_cpmk', $combo['id_cpmk'])
-                    ->update(['bobot_mk' => $totalBobot]);
+                $this->syncBobotMkByCplMk($combo['id_cpl'], $combo['id_mk']);
             }
 
             return redirect()->route('tahap-mekanisme-penilaian.index')

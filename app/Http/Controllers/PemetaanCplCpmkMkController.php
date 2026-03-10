@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\PemetaanCplCpmkMk;
-use App\Models\CapaianLulusanProdi;
+use App\Models\CapaianPembelajaranMataKuliah;
 use App\Models\MataKuliah;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
+use Illuminate\Validation\Rule;
 
 class PemetaanCplCpmkMkController extends Controller
 {
@@ -18,10 +19,12 @@ class PemetaanCplCpmkMkController extends Controller
         $pemetaan = PemetaanCplCpmkMk::orderBy('id_cpl', 'asc')
             ->orderBy('id_cpmk', 'asc')
             ->get();
-        $cpls = CapaianLulusanProdi::orderBy('id', 'asc')->get();
+        $cpmkMaster = CapaianPembelajaranMataKuliah::orderBy('id_cpl', 'asc')
+            ->orderBy('id_cpmk', 'asc')
+            ->get();
         $mks = MataKuliah::orderBy('id', 'asc')->get();
         
-        return view('pemetaan-cpl-cpmk-mk', compact('pemetaan', 'cpls', 'mks'));
+        return view('pemetaan-cpl-cpmk-mk', compact('pemetaan', 'cpmkMaster', 'mks'));
     }
 
     /**
@@ -30,14 +33,19 @@ class PemetaanCplCpmkMkController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_cpl' => 'required|string|max:10',
-            'desk_cpl' => 'required|string',
-            'id_cpmk' => 'required|string|max:20',
-            'desk_cpmk' => 'required|string|unique:tbl_pemetaan_cpl_cpmk_mk,desk_cpmk',
-            'id_mk' => 'required|string|max:10',
+            'source_desk_cpmk' => 'required|string|exists:mst_cpmk,desk_cpmk|unique:tbl_pemetaan_cpl_cpmk_mk,desk_cpmk',
+            'id_mk' => 'required|string|max:10|exists:mst_mk,id',
         ]);
 
-        PemetaanCplCpmkMk::create($request->all());
+        $source = CapaianPembelajaranMataKuliah::findOrFail($request->source_desk_cpmk);
+
+        PemetaanCplCpmkMk::create([
+            'id_cpl' => $source->id_cpl,
+            'desk_cpl' => $source->desk_cpl,
+            'id_cpmk' => $source->id_cpmk,
+            'desk_cpmk' => $source->desk_cpmk,
+            'id_mk' => $request->id_mk,
+        ]);
 
         return redirect()->route('pemetaan-cpl-cpmk-mk.index')->with('success', 'Data pemetaan berhasil ditambahkan!');
     }
@@ -56,31 +64,35 @@ class PemetaanCplCpmkMkController extends Controller
     public function update(Request $request, PemetaanCplCpmkMk $pemetaanCplCpmkMk)
     {
         $oldDeskCpmk = $pemetaanCplCpmkMk->desk_cpmk;
-        $newDeskCpmk = $request->desk_cpmk;
+        $newDeskCpmk = $request->source_desk_cpmk;
 
         $request->validate([
-            'id_cpl' => 'required|string|max:10',
-            'desk_cpl' => 'required|string',
-            'id_cpmk' => 'required|string|max:20',
-            'desk_cpmk' => 'required|string|unique:tbl_pemetaan_cpl_cpmk_mk,desk_cpmk,' . $oldDeskCpmk . ',desk_cpmk',
-            'id_mk' => 'required|string|max:10',
+            'source_desk_cpmk' => [
+                'required',
+                'string',
+                'exists:mst_cpmk,desk_cpmk',
+                Rule::unique('tbl_pemetaan_cpl_cpmk_mk', 'desk_cpmk')->ignore($oldDeskCpmk, 'desk_cpmk'),
+            ],
+            'id_mk' => 'required|string|max:10|exists:mst_mk,id',
         ]);
+
+        $source = CapaianPembelajaranMataKuliah::findOrFail($newDeskCpmk);
 
         // Jika desk_cpmk berubah, kita perlu menghapus yang lama dan membuat yang baru
         // Tapi tetap gunakan CPL yang sudah ada (tidak diubah)
         if ($oldDeskCpmk !== $newDeskCpmk) {
             $data = [
-                'id_cpl' => $pemetaanCplCpmkMk->id_cpl, // Gunakan CPL yang sudah ada
-                'desk_cpl' => $pemetaanCplCpmkMk->desk_cpl, // Gunakan desk_cpl yang sudah ada
-                'id_cpmk' => $request->id_cpmk,
-                'desk_cpmk' => $request->desk_cpmk,
+                'id_cpl' => $source->id_cpl,
+                'desk_cpl' => $source->desk_cpl,
+                'id_cpmk' => $source->id_cpmk,
+                'desk_cpmk' => $source->desk_cpmk,
                 'id_mk' => $request->id_mk,
             ];
             $pemetaanCplCpmkMk->delete();
             PemetaanCplCpmkMk::create($data);
         } else {
-            // Update hanya CPMK dan MK, tidak update CPL
-            $pemetaanCplCpmkMk->update($request->only(['id_cpmk', 'id_mk']));
+            // Jika CPMK tetap sama, cukup update MK.
+            $pemetaanCplCpmkMk->update($request->only(['id_mk']));
         }
 
         return redirect()->route('pemetaan-cpl-cpmk-mk.index')->with('success', 'Data pemetaan berhasil diupdate!');

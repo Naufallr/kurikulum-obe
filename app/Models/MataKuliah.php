@@ -18,7 +18,10 @@ class MataKuliah extends Model
     protected $fillable = [
         'id',
         'nama_mk',
+        'sks',
         'jenis_mk',
-        'status'
+        'status',
+        'tahun',
+        'semester'
     ];
 }

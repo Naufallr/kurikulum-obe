@@ -7,6 +7,7 @@
     <title>Mata Kuliah - Kurikulum UKRI</title>
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/blade-animations.css') }}">
 </head>
 <body>
     <!-- Top Header Bar -->
@@ -18,19 +19,26 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="btn-keluar">Keluar</button>
-            <div class="user-info user-info--header">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-details">
-                    <div class="user-name">Naufal Maulana</div>
-                    <div class="user-id">20231320044</div>
-                </div>
-                <div class="user-settings">
-                    <i class="fas fa-cog"></i>
-                </div>
-            </div>
+
+            <div class="user-dropdown">
+    <button type="button" class="user-info user-info--header user-dropdown-toggle">
+        <div class="user-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+            <div class="user-name">{{ auth()->user()->name ?? 'User' }}</div>
+        </div>
+        <div class="user-chevron">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </button>
+    <div class="user-dropdown-menu">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="user-dropdown-item">Keluar</button>
+        </form>
+    </div>
+</div>
         </div>
     </header>
 
@@ -44,15 +52,15 @@
                 <div class="nav-divider"></div>
                 <a href="{{ route('bahan-kajian.index') }}" class="nav-item">Bahan Kajian</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('mata-kuliah.index') }}" class="nav-item active">Mata Kuliah</a>
+                <a href="{{route('mata-kuliah.index')}}" class="nav-item active">Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
+                <a href="{{ route('capaian-pembelajaran-mata-kuliah.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item">Pemetaan Sub-CPMK</a>
+                <a href="{{ route('sub-cpmk.index') }}" class="nav-item">Sub-CPMK</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Penilaian</span>
-                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-right"></i>
                 </a>
                 <div class="submenu">
                     <a href="{{route('tahap-mekanisme-penilaian.index')}}" class="nav-item submenu-item">Teknik Penilaian</a>
@@ -75,7 +83,7 @@
                     <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item submenu-item">Pemetaan MK-CPMK-SubCPMK</a>
                 </div>
             </nav>
-</aside>
+        </aside>
 
         <!-- Main Content Area -->
         <main class="main-content">
@@ -98,19 +106,23 @@
             @endif
 
             <div class="toolbar">
-                <div class="filters">
-                    <select class="filter-select" aria-label="Tahun">
-                        <option value="" selected>Tahun</option>
-                        @for($y = (int) date('Y'); $y >= 2020; $y--)
-                            <option value="{{ $y }}">{{ $y }}</option>
+                <form class="filters" method="GET" action="{{ route('mata-kuliah.index') }}">
+                    <select class="filter-select" name="tahun" aria-label="Tahun" onchange="this.form.submit()">
+                        <option value="" {{ empty($tahun) ? 'selected' : '' }}>Tahun</option>
+                        @for($y = 2030; $y >= 2020; $y--)
+                            <option value="{{ $y }}" {{ (string) $tahun === (string) $y ? 'selected' : '' }}>{{ $y }}</option>
                         @endfor
                     </select>
-                    <select class="filter-select" aria-label="Semester">
-                        <option value="" selected>Semester</option>
-                        <option value="ganjil">Ganjil</option>
-                        <option value="genap">Genap</option>
+                    <select class="filter-select" name="semester" aria-label="Semester" onchange="this.form.submit()">
+                        <option value="" {{ empty($semester) ? 'selected' : '' }}>Semester</option>
+                        @for($s = 1; $s <= 8; $s++)
+                            <option value="{{ $s }}" {{ (string) $semester === (string) $s ? 'selected' : '' }}>{{ $s }}</option>
+                        @endfor
                     </select>
-                </div>
+                    <noscript>
+                        <button type="submit" class="btn-action">Filter</button>
+                    </noscript>
+                </form>
 
                 <div class="action-buttons">
                     <button class="btn-action btn-tambah" onclick="openModal('create')">
@@ -135,8 +147,11 @@
                             <th>NO</th>
                             <th>KODE</th>
                             <th>NAMA MATA KULIAH</th>
+                            <th>SKS</th>
                             <th>JENIS MK</th>
                             <th>STATUS</th>
+                            <th>TAHUN</th>
+                            <th>SEMESTER</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -148,12 +163,15 @@
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $item->id }}</td>
                             <td>{{ $item->nama_mk }}</td>
+                            <td>{{ $item->sks }}</td>
                             <td>{{ $item->jenis_mk }}</td>
                             <td>{{ $item->status }}</td>
+                            <td>{{ $item->tahun }}</td>
+                            <td>{{ $item->semester }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px;">
+                            <td colspan="9" style="text-align: center; padding: 20px;">
                                 <em>Tidak ada data</em>
                             </td>
                         </tr>
@@ -187,6 +205,11 @@
                 </div>
 
                 <div class="form-group-modal">
+                    <label for="sks">SKS <span class="required">*</span></label>
+                    <input type="number" id="sks" name="sks" class="form-input-modal" min="0" required>
+                </div>
+
+                <div class="form-group-modal">
                     <label for="jenis_mk">JENIS MK <span class="required">*</span></label>
                     <input type="text" id="jenis_mk" name="jenis_mk" class="form-input-modal" required>
                 </div>
@@ -194,6 +217,19 @@
                 <div class="form-group-modal">
                     <label for="status">STATUS <span class="required">*</span></label>
                     <input type="text" id="status" name="status" class="form-input-modal" required>
+                </div>
+                <div class="form-group-modal">
+                    <label for="tahun">TAHUN <span class="required">*</span></label>
+                    <input type="number" id="tahun" name="tahun" class="form-input-modal" required>
+                </div>
+                <div class="form-group-modal">
+                    <label for="semester">SEMESTER <span class="required">*</span></label>
+                    <select id="semester" name="semester" class="form-input-modal" required>
+                        <option value="" selected>Pilih semester</option>
+                        @for($s = 1; $s <= 8; $s++)
+                            <option value="{{ $s }}">Semester {{ $s }}</option>
+                        @endfor
+                    </select>
                 </div>
 
                 <div class="modal-footer">
@@ -266,8 +302,11 @@
                         document.getElementById('originalNamaMk').value = data.nama_mk;
                         document.getElementById('id').value = data.id;
                         document.getElementById('nama_mk').value = data.nama_mk;
+                        document.getElementById('sks').value = data.sks ?? '';
                         document.getElementById('jenis_mk').value = data.jenis_mk;
                         document.getElementById('status').value = data.status;
+                        document.getElementById('tahun').value = data.tahun ?? '';
+                        document.getElementById('semester').value = data.semester ?? '';
                         modal.style.display = 'block';
                     })
                     .catch(error => {
@@ -388,7 +427,36 @@
                 putForm.submit();
             }
         });
-    </script>
+    </script>\n<script>
+    document.addEventListener('click', function (event) {
+        const dropdown = event.target.closest('.user-dropdown');
+        document.querySelectorAll('.user-dropdown.is-open').forEach(function (item) {
+            if (item !== dropdown) {
+                item.classList.remove('is-open');
+            }
+        });
+
+        if (!dropdown) {
+            return;
+        }
+
+        const toggle = event.target.closest('.user-dropdown-toggle');
+        if (toggle) {
+            event.preventDefault();
+            dropdown.classList.toggle('is-open');
+        }
+    });
+</script>
+    <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 

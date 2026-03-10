@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kurikulum UKRI</title>
     <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/blade-animations.css') }}">
 </head>
 <body>
     <header>
@@ -149,5 +150,15 @@
             update(0);
         }
     </script>
+    <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+

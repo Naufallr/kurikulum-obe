@@ -18,12 +18,14 @@ class PemetaanCplBkMkController extends Controller
         $mks = MataKuliah::orderBy('id', 'asc')->get();
         $mappings = PemetaanCplBkMk::all();
 
-        $mapped = [];
+        $selectedMk = [];
         foreach ($mappings as $mapping) {
-            $mapped[$mapping->id_cpl][$mapping->id_bk][$mapping->id_mk] = true;
+            if (empty($selectedMk[$mapping->id_cpl][$mapping->id_bk])) {
+                $selectedMk[$mapping->id_cpl][$mapping->id_bk] = $mapping->id_mk;
+            }
         }
 
-        return view('pemetaan-cpl-bk-mk', compact('cpls', 'bks', 'mks', 'mapped'));
+        return view('pemetaan-cpl-bk-mk', compact('cpls', 'bks', 'mks', 'selectedMk'));
     }
 
     public function store(Request $request)
@@ -32,15 +34,27 @@ class PemetaanCplBkMkController extends Controller
         $payload = [];
 
         foreach ($mapping as $cplId => $bkItems) {
-            foreach ($bkItems as $bkId => $mkItems) {
-                foreach ($mkItems as $mkId => $value) {
-                    if ($value) {
-                        $payload[] = [
-                            'id_cpl' => $cplId,
-                            'id_bk' => $bkId,
-                            'id_mk' => $mkId,
-                        ];
+            foreach ($bkItems as $bkId => $mkSelection) {
+                // Backward compatible: support old checkbox matrix payload.
+                if (is_array($mkSelection)) {
+                    foreach ($mkSelection as $mkId => $value) {
+                        if ($value) {
+                            $payload[] = [
+                                'id_cpl' => $cplId,
+                                'id_bk' => $bkId,
+                                'id_mk' => $mkId,
+                            ];
+                        }
                     }
+                    continue;
+                }
+
+                if (!empty($mkSelection)) {
+                    $payload[] = [
+                        'id_cpl' => $cplId,
+                        'id_bk' => $bkId,
+                        'id_mk' => $mkSelection,
+                    ];
                 }
             }
         }

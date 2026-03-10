@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PemetaanSubcpmk;
 use App\Models\PemetaanCplCpmkMk;
 use App\Models\MataKuliah;
+use App\Models\SubCpmk;
 use App\Models\CapaianLulusanProdi;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
@@ -24,12 +25,12 @@ class PemetaanSubcpmkController extends Controller
 
         $mks = MataKuliah::orderBy('id', 'asc')->get();
         $cpls = CapaianLulusanProdi::orderBy('id', 'asc')->get();
-        $cpmks = PemetaanCplCpmkMk::orderBy('id_mk', 'asc')
-            ->orderBy('id_cpl', 'asc')
+        $subcpmkMaster = SubCpmk::orderBy('id_cpl', 'asc')
             ->orderBy('id_cpmk', 'asc')
+            ->orderBy('id_subcpmk', 'asc')
             ->get();
 
-        return view('pemetaan-subcpmk', compact('data', 'mks', 'cpls', 'cpmks'));
+        return view('pemetaan-subcpmk', compact('data', 'mks', 'cpls', 'subcpmkMaster'));
     }
 
     /**
@@ -38,24 +39,39 @@ class PemetaanSubcpmkController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'id_mk' => 'required|string|max:10',
-            'id_cpl' => 'required|string|max:10',
-            'id_cpmk' => 'required|string|max:10',
-            'desk_cpmk' => 'required|string',
-            'sub_cpmk' => 'required|string|max:20',
-            'desk_subcpmk' => 'required|string|unique:tbl_pemetaan_mk_cpmk_subcpmk,desk_subcpmk',
+            'id_mk' => 'required|string|max:10|exists:mst_mk,id',
+            'source_id_subcpmk' => 'required|string|exists:mst_subcpmk,id_subcpmk',
         ]);
 
-        PemetaanSubcpmk::create($request->only([
-            'id_mk',
-            'id_cpl',
-            'id_cpmk',
-            'desk_cpmk',
-            'sub_cpmk',
-            'desk_subcpmk',
-        ]));
+        $source = SubCpmk::findOrFail($request->source_id_subcpmk);
+        $mapping = PemetaanCplCpmkMk::where('id_mk', $request->id_mk)
+            ->where('id_cpl', $source->id_cpl)
+            ->where('id_cpmk', $source->id_cpmk)
+            ->first();
 
-        return redirect()->route('pemetaan-subcpmk.index')->with('success', 'Data Sub-CPMK berhasil ditambahkan!');
+        if (!$mapping) {
+            return redirect()->route('pemetaan-subcpmk.index')
+                ->withErrors(['error' => "Sub-CPMK {$source->id_subcpmk} tidak cocok dengan pemetaan CPL-CPMK pada MK {$request->id_mk}."])
+                ->withInput();
+        }
+
+        $exists = PemetaanSubcpmk::where('desk_subcpmk', $source->desk_subcpmk)->exists();
+        if ($exists) {
+            return redirect()->route('pemetaan-subcpmk.index')
+                ->withErrors(['error' => "Sub-CPMK {$source->id_subcpmk} sudah ada di pemetaan."])
+                ->withInput();
+        }
+
+        PemetaanSubcpmk::create([
+            'id_mk' => $request->id_mk,
+            'id_cpl' => $source->id_cpl,
+            'id_cpmk' => $source->id_cpmk,
+            'desk_cpmk' => $mapping->desk_cpmk,
+            'sub_cpmk' => $source->id_subcpmk,
+            'desk_subcpmk' => $source->desk_subcpmk,
+        ]);
+
+        return redirect()->route('pemetaan-subcpmk.index')->with('success', 'Data Sub-CPMK berhasil ditambahkan dari database.');
     }
 
     /**
@@ -71,28 +87,56 @@ class PemetaanSubcpmkController extends Controller
      */
     public function update(Request $request, PemetaanSubcpmk $pemetaanSubcpmk)
     {
-        $oldDesk = $pemetaanSubcpmk->desk_subcpmk;
-        $newDesk = $request->desk_subcpmk;
-
         $request->validate([
-            // MK/CPL/CPMK diset readonly di UI, tapi tetap divalidasi agar data lengkap saat create ulang
-            'id_mk' => 'required|string|max:10',
-            'id_cpl' => 'required|string|max:10',
-            'id_cpmk' => 'required|string|max:10',
-            'desk_cpmk' => 'required|string',
-            'sub_cpmk' => 'required|string|max:20',
-            'desk_subcpmk' => 'required|string|unique:tbl_pemetaan_mk_cpmk_subcpmk,desk_subcpmk,' . $oldDesk . ',desk_subcpmk',
+            'id_mk' => 'required|string|max:10|exists:mst_mk,id',
+            'source_id_subcpmk' => 'required|string|exists:mst_subcpmk,id_subcpmk',
         ]);
 
+        $source = SubCpmk::findOrFail($request->source_id_subcpmk);
+        $mapping = PemetaanCplCpmkMk::where('id_mk', $request->id_mk)
+            ->where('id_cpl', $source->id_cpl)
+            ->where('id_cpmk', $source->id_cpmk)
+            ->first();
+
+        if (!$mapping) {
+            return redirect()->route('pemetaan-subcpmk.index')
+                ->withErrors(['error' => "Sub-CPMK {$source->id_subcpmk} tidak cocok dengan pemetaan CPL-CPMK pada MK {$request->id_mk}."])
+                ->withInput();
+        }
+
+        $oldDesk = $pemetaanSubcpmk->desk_subcpmk;
+        $newDesk = $source->desk_subcpmk;
+
         if ($oldDesk !== $newDesk) {
-            $data = $request->only(['id_mk', 'id_cpl', 'id_cpmk', 'desk_cpmk', 'sub_cpmk', 'desk_subcpmk']);
+            $isDeskUsed = PemetaanSubcpmk::where('desk_subcpmk', $newDesk)->exists();
+            if ($isDeskUsed) {
+                return redirect()->route('pemetaan-subcpmk.index')
+                    ->withErrors(['error' => "Sub-CPMK {$source->id_subcpmk} sudah dipakai pada pemetaan lain."])
+                    ->withInput();
+            }
+
+            $data = [
+                'id_mk' => $request->id_mk,
+                'id_cpl' => $source->id_cpl,
+                'id_cpmk' => $source->id_cpmk,
+                'desk_cpmk' => $mapping->desk_cpmk,
+                'sub_cpmk' => $source->id_subcpmk,
+                'desk_subcpmk' => $source->desk_subcpmk,
+            ];
+
             $pemetaanSubcpmk->delete();
             PemetaanSubcpmk::create($data);
         } else {
-            $pemetaanSubcpmk->update($request->only(['sub_cpmk', 'desk_subcpmk']));
+            $pemetaanSubcpmk->update([
+                'id_mk' => $request->id_mk,
+                'id_cpl' => $source->id_cpl,
+                'id_cpmk' => $source->id_cpmk,
+                'desk_cpmk' => $mapping->desk_cpmk,
+                'sub_cpmk' => $source->id_subcpmk,
+            ]);
         }
 
-        return redirect()->route('pemetaan-subcpmk.index')->with('success', 'Data Sub-CPMK berhasil diupdate!');
+        return redirect()->route('pemetaan-subcpmk.index')->with('success', 'Data Sub-CPMK berhasil diupdate dari database.');
     }
 
     /**

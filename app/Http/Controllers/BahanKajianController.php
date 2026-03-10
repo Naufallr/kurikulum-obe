@@ -50,7 +50,7 @@ class BahanKajianController extends Controller
     {
         $request->validate([
             'id' => 'required|string|max:10',
-            'bahan_kajian' => 'required|string|max:255|unique:table_bk,bahan_kajian,' . $bahanKajian->bahan_kajian . ',bahan_kajian',
+            'bahan_kajian' => 'required|string|max:255|unique:mst_bk,bahan_kajian,' . $bahanKajian->bahan_kajian . ',bahan_kajian',
             'kategori' => 'required|string|max:255',
             'referensi' => 'required|string|max:255',
         ]);

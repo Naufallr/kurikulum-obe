@@ -65,6 +65,67 @@ body {
     gap: 16px;
 }
 
+.user-dropdown {
+    position: relative;
+}
+
+.user-dropdown-toggle {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: white;
+}
+
+.user-dropdown-toggle:focus {
+    outline: none;
+}
+
+.user-chevron {
+    color: #ffffff;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background-color: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    min-width: 140px;
+    display: none;
+    overflow: hidden;
+    z-index: 1200;
+}
+
+.user-dropdown.is-open .user-dropdown-menu {
+    display: block;
+}
+
+.user-dropdown-menu form {
+    margin: 0;
+}
+
+.user-dropdown-item {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #A50000;
+    cursor: pointer;
+}
+
+.user-dropdown-item:hover {
+    background-color: #f5f5f5;
+}
+
 .btn-keluar {
     background-color: #E57373;
     color: white;
@@ -92,19 +153,47 @@ body {
 .sidebar {
     background-color: #A50000;
     width: 250px;
-    height: 100%;
+    height: calc(100vh - 60px);
     display: flex;
     flex-direction: column;
     position: fixed;
     left: 0;
     top: 60px;
-    bottom: 0;
-    overflow-y: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+}
+
+/* Sidebar scrollbar */
+.sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.7) rgba(255, 255, 255, 0.2);
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 12px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    min-height: 120px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.85);
 }
 
 .sidebar-nav {
     flex: 1;
     padding: 20px 0;
+    padding-bottom: 18px;
 }
 
 .nav-item {
@@ -156,6 +245,12 @@ body {
 .submenu-item {
     padding-left: 40px !important;
     font-size: 13px;
+}
+
+.nav-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
+    margin: 5px 0;
 }
 
 /* User Info at Bottom */

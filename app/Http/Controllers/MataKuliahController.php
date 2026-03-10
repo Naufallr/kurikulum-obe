@@ -12,10 +12,25 @@ class MataKuliahController extends Controller
     /**
      * Display a listing of the Mata Kuliah.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $mataKuliah = MataKuliah::orderBy('id', 'asc')->get();
-        return view('mata-kuliah', compact('mataKuliah'));
+        $tahun = $request->query('tahun');
+        $semester = $request->query('semester');
+
+        $query = MataKuliah::query();
+
+        if (!empty($tahun)) {
+            $query->where('tahun', $tahun);
+        }
+
+        if (!empty($semester)) {
+            $query->where('semester', $semester);
+        }
+
+        $mataKuliah = $query->orderBy('semester', 'asc')
+        ->orderBy('id','asc')->get();
+
+        return view('mata-kuliah', compact('mataKuliah', 'tahun', 'semester'));
     }
 
     /**
@@ -26,8 +41,11 @@ class MataKuliahController extends Controller
         $request->validate([
             'id' => 'required|string|max:10',
             'nama_mk' => 'required|string|max:255|unique:mst_mk,nama_mk',
+            'sks' => 'required|integer|min:0',
             'jenis_mk' => 'required|string|max:255',
             'status' => 'required|string|max:30',
+            'tahun' => 'required|integer',
+            'semester' => 'required|integer|between:1,8',
         ]);
 
         MataKuliah::create($request->all());
@@ -50,10 +68,12 @@ class MataKuliahController extends Controller
     {
         $request->validate([
             'id' => 'required|string|max:10',
-            // abaikan record yang sedang diedit (PK = nama_mk)
             'nama_mk' => 'required|string|max:255|unique:mst_mk,nama_mk,' . $mataKuliah->nama_mk . ',nama_mk',
+            'sks' => 'required|integer|min:0',
             'jenis_mk' => 'required|string|max:255',
             'status' => 'required|string|max:30',
+            'tahun' => 'required|integer',
+            'semester' => 'required|integer|between:1,8',
         ]);
 
         $mataKuliah->update($request->all());

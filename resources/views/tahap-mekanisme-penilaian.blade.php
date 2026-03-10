@@ -7,6 +7,7 @@
     <title>Tahap Mekanisme Penilaian - Kurikulum UKRI</title>
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/blade-animations.css') }}">
 </head>
 <body>
     <!-- Top Header Bar -->
@@ -18,26 +19,44 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="btn-keluar">Keluar</button>
+            <div class="user-dropdown">
+                <button type="button" class="user-info user-info--header user-dropdown-toggle">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">{{ auth()->user()->name ?? 'User' }}</div>
+                    </div>
+                    <div class="user-chevron">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </button>
+                <div class="user-dropdown-menu">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="user-dropdown-item">Keluar</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </header>
     <div class="dashboard-container">
         <!-- Left Sidebar -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <a href="{{route('dashboard')}}" class="nav-item">Profile Lulusan</a>
+                <a href="{{ route('dashboard') }}" class="nav-item">Profile Lulusan</a>
                 <div class="nav-divider"></div>
-                <a href="{{route('capaian-lulusan-prodi.index')}}" class="nav-item">Capaian Pembelajaran Lulusan</a>
+                <a href="{{ route('capaian-lulusan-prodi.index') }}" class="nav-item">Capaian Pembelajaran Lulusan</a>
                 <div class="nav-divider"></div>
-                <a href="{{route('bahan-kajian.index')}}" class="nav-item">Bahan Kajian</a>
+                <a href="{{ route('bahan-kajian.index') }}" class="nav-item">Bahan Kajian</a>
                 <div class="nav-divider"></div>
                 <a href="{{route('mata-kuliah.index')}}" class="nav-item">Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{route('pemetaan-cpl-cpmk-mk.index')}}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
+                <a href="{{ route('capaian-pembelajaran-mata-kuliah.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{route('pemetaan-subcpmk.index')}}" class="nav-item">Sub-CPMK</a>
+                <a href="{{ route('sub-cpmk.index') }}" class="nav-item">Sub-CPMK</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Penilaian</span>
                     <i class="fas fa-chevron-down"></i>
                 </a>
@@ -130,13 +149,14 @@
                                     $groupedByCpmk = $mkItems->groupBy('id_cpmk');
                                     $mkRowspan = $mkItems->count();
                                     $printedMk = false;
+                                    $printedBobotMk = false;
+                                    $totalBobotMk = $mkItems->sum('bobot');
                                 @endphp
 
                                 @foreach($groupedByCpmk as $cpmkId => $cpmkItems)
                                     @php
                                         $printedCpmk = false;
                                         $cpmkRowspan = $cpmkItems->count();
-                                        $totalBobotMk = $cpmkItems->sum('bobot');
                                     @endphp
 
                                     @foreach($cpmkItems as $index => $row)
@@ -166,8 +186,9 @@
                                             <td>{{ $row->instrumen }}</td>
                                             <td>{{ $row->kriteria }}</td>
                                             <td>{{ $row->bobot }}</td>
-                                            @if($index === 0)
-                                                <td rowspan="{{ $cpmkRowspan }}">{{ $totalBobotMk }}</td>
+                                            @if(!$printedBobotMk)
+                                                <td rowspan="{{ $mkRowspan }}">{{ $totalBobotMk }}</td>
+                                                @php $printedBobotMk = true; @endphp
                                             @endif
                                         </tr>
                                     @endforeach
@@ -313,7 +334,7 @@
             }
 
             const rowId = checkboxes[0].value;
-            fetch(`/tahap-mekanisme-penilaian/get-data/${encodeURIComponent(rowId)}`)
+            fetch(`/tahap-mekanisme-penilaian/${encodeURIComponent(rowId)}`)
                 .then(r => r.json())
                 .then(data => {
                     document.getElementById('modalTitle').textContent = 'Edit Data';
@@ -453,5 +474,33 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('click', function (event) {
+            const dropdown = event.target.closest('.user-dropdown');
+            document.querySelectorAll('.user-dropdown.is-open').forEach(function (item) {
+                if (item !== dropdown) {
+                    item.classList.remove('is-open');
+                }
+            });
+
+            if (!dropdown) {
+                return;
+            }
+
+            const toggle = event.target.closest('.user-dropdown-toggle');
+            if (toggle) {
+                event.preventDefault();
+                dropdown.classList.toggle('is-open');
+            }
+        });
+    </script>
+    <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+

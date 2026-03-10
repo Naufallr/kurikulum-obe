@@ -7,6 +7,7 @@
     <title>Organisasi Mata Kuliah - Kurikulum UKRI</title>
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/blade-animations.css') }}">
 </head>
 <body>
     <header class="top-header">
@@ -17,19 +18,26 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="btn-keluar">Keluar</button>
-            <div class="user-info user-info--header">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-details">
-                    <div class="user-name">Naufal Maulana</div>
-                    <div class="user-id">20231320044</div>
-                </div>
-                <div class="user-settings">
-                    <i class="fas fa-cog"></i>
-                </div>
-            </div>
+
+            <div class="user-dropdown">
+    <button type="button" class="user-info user-info--header user-dropdown-toggle">
+        <div class="user-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+            <div class="user-name">{{ auth()->user()->name ?? 'User' }}</div>
+        </div>
+        <div class="user-chevron">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </button>
+    <div class="user-dropdown-menu">
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="user-dropdown-item">Keluar</button>
+        </form>
+    </div>
+</div>
         </div>
     </header>
 
@@ -42,22 +50,22 @@
                 <div class="nav-divider"></div>
                 <a href="{{ route('bahan-kajian.index') }}" class="nav-item">Bahan Kajian</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('mata-kuliah.index') }}" class="nav-item">Mata Kuliah</a>
+                <a href="{{route('mata-kuliah.index')}}" class="nav-item">Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
+                <a href="{{ route('capaian-pembelajaran-mata-kuliah.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item">Sub-CPMK</a>
+                <a href="{{ route('sub-cpmk.index') }}" class="nav-item">Sub-CPMK</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Penilaian</span>
-                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-right"></i>
                 </a>
                 <div class="submenu">
-                    <a href="{{ route('tahap-mekanisme-penilaian.index') }}" class="nav-item submenu-item">Teknik Penilaian</a>
-                    <a href="{{ route('bobot-penilaian.index') }}" class="nav-item submenu-item">Bobot Penilaian</a>
+                    <a href="{{route('tahap-mekanisme-penilaian.index')}}" class="nav-item submenu-item">Teknik Penilaian</a>
+                    <a href="{{route('bobot-penilaian.index')}}" class="nav-item submenu-item">Bobot Penilaian</a>
                 </div>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Pemetaan</span>
                     <i class="fas fa-chevron-down"></i>
                 </a>
@@ -73,19 +81,6 @@
                     <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item submenu-item">Pemetaan MK-CPMK-SubCPMK</a>
                 </div>
             </nav>
-
-            <div class="user-info">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-details">
-                    <div class="user-name">Naufal Maulana</div>
-                    <div class="user-id">20231320044</div>
-                </div>
-                <div class="user-settings">
-                    <i class="fas fa-cog"></i>
-                </div>
-            </div>
         </aside>
 
         <main class="main-content">
@@ -147,7 +142,37 @@
                 }
             }
         }
-    </script>
+    </script>\n<script>
+    document.addEventListener('click', function (event) {
+        const dropdown = event.target.closest('.user-dropdown');
+        document.querySelectorAll('.user-dropdown.is-open').forEach(function (item) {
+            if (item !== dropdown) {
+                item.classList.remove('is-open');
+            }
+        });
+
+        if (!dropdown) {
+            return;
+        }
+
+        const toggle = event.target.closest('.user-dropdown-toggle');
+        if (toggle) {
+            event.preventDefault();
+            dropdown.classList.toggle('is-open');
+        }
+    });
+</script>
+    <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
 

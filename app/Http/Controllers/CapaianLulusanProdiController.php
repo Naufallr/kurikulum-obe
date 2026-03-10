@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CapaianLulusanProdi;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
+use Illuminate\Validation\Rule;
 
 class CapaianLulusanProdiController extends Controller
 {
@@ -47,8 +48,17 @@ class CapaianLulusanProdiController extends Controller
     public function update(Request $request, CapaianLulusanProdi $capaianLulusanProdi)
     {
         $request->validate([
-            'id' => 'required|string|max:5|unique:mst_cplp,id,' . $capaianLulusanProdi->id . ',id',
-            'desk' => 'required|string|unique:mst_cplp,desk,' . $capaianLulusanProdi->desk,
+            'id' => [
+                'required',
+                'string',
+                'max:5',
+                Rule::unique('mst_cplp', 'id')->ignore($capaianLulusanProdi->id, 'id'),
+            ],
+            'desk' => [
+                'required',
+                'string',
+                Rule::unique('mst_cplp', 'desk')->ignore($capaianLulusanProdi->id, 'id'),
+            ],
             'aspek' => 'nullable|string|max:255',
         ]);
 

@@ -7,9 +7,9 @@
     <title>Pemetaan CPMK - Kurikulum UKRI</title>
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/blade-animations.css') }}">
 </head>
 <body>
-    <!-- Top Header Bar -->
     <header class="top-header">
         <div class="header-left">
             <img src="{{ asset('storage/logo ukri.png') }}" alt="Logo UKRI" class="header-logo">
@@ -18,17 +18,23 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="btn-keluar">Keluar</button>
-            <div class="user-info user-info--header">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-details">
-                    <div class="user-name">Naufal Maulana</div>
-                    <div class="user-id">20231320044</div>
-                </div>
-                <div class="user-settings">
-                    <i class="fas fa-cog"></i>
+            <div class="user-dropdown">
+                <button type="button" class="user-info user-info--header user-dropdown-toggle">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">{{ auth()->user()->name ?? 'User' }}</div>
+                    </div>
+                    <div class="user-chevron">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </button>
+                <div class="user-dropdown-menu">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="user-dropdown-item">Keluar</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -46,24 +52,24 @@
                 <div class="nav-divider"></div>
                 <a href="{{route('mata-kuliah.index')}}" class="nav-item">Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item active">Capaian Pembelajaran Mata Kuliah</a>
+                <a href="{{ route('capaian-pembelajaran-mata-kuliah.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item">Sub-CPMK</a>
+                <a href="{{ route('sub-cpmk.index') }}" class="nav-item">Sub-CPMK</a>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Penilaian</span>
-                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-right"></i>
                 </a>
-                <div class="submenu active">
+                <div class="submenu">
                     <a href="{{route('tahap-mekanisme-penilaian.index')}}" class="nav-item submenu-item">Teknik Penilaian</a>
                     <a href="{{route('bobot-penilaian.index')}}" class="nav-item submenu-item">Bobot Penilaian</a>
                 </div>
                 <div class="nav-divider"></div>
                 <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Pemetaan</span>
-                    <i class="fas fa-chevron-right"></i>
+                    <i class="fas fa-chevron-down"></i>
                 </a>
-                <div class="submenu">
+                <div class="submenu active">
                     <a href="{{ route('pemetaan-cpl-pl.index') }}" class="nav-item submenu-item">CPL-PL</a>
                     <a href="{{ route('pemetaan-cpl-bk.index') }}" class="nav-item submenu-item">CPL-BK</a>
                     <a href="{{ route('pemetaan-bk-mk.index') }}" class="nav-item submenu-item">BK-MK</a>
@@ -71,7 +77,7 @@
                     <a href="{{ route('pemetaan-cpl-bk-mk.index') }}" class="nav-item submenu-item">CPL-BK-MK</a>
                     <a href="{{ route('organisasi-mata-kuliah.index') }}" class="nav-item submenu-item">Organisasi Mata Kuliah (OMK)</a>
                     <a href="{{ route('peta-pemenuhan-cpl.index') }}" class="nav-item submenu-item">Peta Pemenuhan CPL</a>
-                    <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item submenu-item">Pemetaan CPL-CPMK-MK</a>
+                    <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item submenu-item active">Pemetaan CPL-CPMK-MK</a>
                     <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item submenu-item">Pemetaan MK-CPMK-SubCPMK</a>
                 </div>
             </nav>
@@ -174,32 +180,41 @@
                 @csrf
                 <input type="hidden" name="_method" id="formMethod" value="POST">
                 <input type="hidden" name="desk_cpmk_old" id="formDeskCpmkOld">
-                <input type="hidden" name="id_cpl" id="id_cpl_hidden">
-
                 <div class="form-group-modal">
-                    <label for="id_cpl">CPL <span class="required">*</span></label>
-                    <select id="id_cpl" name="id_cpl" class="form-input-modal" required onchange="updateDeskCpl()">
-                        <option value="">Pilih CPL</option>
-                        @foreach($cpls as $cpl)
-                            <option value="{{ $cpl->id }}" data-desk="{{ $cpl->desk }}">{{ $cpl->id }}</option>
+                    <label for="source_desk_cpmk">PILIH CPMK (Sumber Mst CPMK) <span class="required">*</span></label>
+                    <select id="source_desk_cpmk" name="source_desk_cpmk" class="form-input-modal" required onchange="applySelectedCpmkData()">
+                        <option value="">Pilih CPMK</option>
+                        @foreach($cpmkMaster as $cpmk)
+                            <option
+                                value="{{ $cpmk->desk_cpmk }}"
+                                data-id-cpl="{{ $cpmk->id_cpl }}"
+                                data-desk-cpl="{{ $cpmk->desk_cpl }}"
+                                data-id-cpmk="{{ $cpmk->id_cpmk }}"
+                                data-desk-cpmk="{{ $cpmk->desk_cpmk }}">
+                                {{ $cpmk->id_cpmk }} - {{ \Illuminate\Support\Str::limit($cpmk->desk_cpmk, 70) }}
+                            </option>
                         @endforeach
                     </select>
-                    <input type="text" id="id_cpl_display" class="form-input-modal" readonly style="display: none;">
                 </div>
 
                 <div class="form-group-modal">
-                    <label for="desk_cpl">DESKRIPSI CPL <span class="required">*</span></label>
-                    <textarea id="desk_cpl" name="desk_cpl" class="form-input-modal" rows="4" required readonly></textarea>
+                    <label for="id_cpl_display">CPL</label>
+                    <input type="text" id="id_cpl_display" class="form-input-modal" readonly>
                 </div>
 
                 <div class="form-group-modal">
-                    <label for="id_cpmk">KODE CPMK <span class="required">*</span></label>
-                    <input type="text" id="id_cpmk" name="id_cpmk" class="form-input-modal" required>
+                    <label for="desk_cpl_display">DESKRIPSI CPL</label>
+                    <textarea id="desk_cpl_display" class="form-input-modal" rows="4" readonly></textarea>
                 </div>
 
                 <div class="form-group-modal">
-                    <label for="desk_cpmk">CPMK <span class="required">*</span></label>
-                    <textarea id="desk_cpmk" name="desk_cpmk" class="form-input-modal" rows="3" required></textarea>
+                    <label for="id_cpmk_display">KODE CPMK</label>
+                    <input type="text" id="id_cpmk_display" class="form-input-modal" readonly>
+                </div>
+
+                <div class="form-group-modal">
+                    <label for="desk_cpmk_display">CPMK</label>
+                    <textarea id="desk_cpmk_display" class="form-input-modal" rows="3" readonly></textarea>
                 </div>
 
                 <div class="form-group-modal">
@@ -255,30 +270,33 @@
             }
         }
 
-        // Update desk_cpl based on selected CPL
-        function updateDeskCpl() {
-            const select = document.getElementById('id_cpl');
+        // Fill CPL/CPMK fields from selected master CPMK
+        function applySelectedCpmkData() {
+            const select = document.getElementById('source_desk_cpmk');
             const selectedOption = select.options[select.selectedIndex];
-            const deskCplInput = document.getElementById('desk_cpl');
-            const idCplHidden = document.getElementById('id_cpl_hidden');
+            const idCplInput = document.getElementById('id_cpl_display');
+            const deskCplInput = document.getElementById('desk_cpl_display');
+            const idCpmkInput = document.getElementById('id_cpmk_display');
+            const deskCpmkInput = document.getElementById('desk_cpmk_display');
 
             if (selectedOption.value) {
-                deskCplInput.value = selectedOption.getAttribute('data-desk') || '';
-                idCplHidden.value = selectedOption.value; // Update hidden input
+                idCplInput.value = selectedOption.getAttribute('data-id-cpl') || '';
+                deskCplInput.value = selectedOption.getAttribute('data-desk-cpl') || '';
+                idCpmkInput.value = selectedOption.getAttribute('data-id-cpmk') || '';
+                deskCpmkInput.value = selectedOption.getAttribute('data-desk-cpmk') || '';
             } else {
+                idCplInput.value = '';
                 deskCplInput.value = '';
-                idCplHidden.value = '';
+                idCpmkInput.value = '';
+                deskCpmkInput.value = '';
             }
         }
 
         // Modal functions
         const modal = document.getElementById('modalForm');
-        let selectedIds = [];
 
         function openModal(mode) {
-            const idCplSelect = document.getElementById('id_cpl');
-            const idCplDisplay = document.getElementById('id_cpl_display');
-            const idCplHidden = document.getElementById('id_cpl_hidden');
+            const sourceSelect = document.getElementById('source_desk_cpmk');
 
             if (mode === 'create') {
                 document.getElementById('modalTitle').textContent = 'Tambah Data';
@@ -286,16 +304,7 @@
                 document.getElementById('formMethod').value = 'POST';
                 document.getElementById('formData').reset();
                 document.getElementById('formDeskCpmkOld').value = '';
-                document.getElementById('desk_cpl').value = '';
-                idCplHidden.value = '';
-
-                // Show select, hide display for create mode
-                idCplSelect.style.display = 'block';
-                idCplDisplay.style.display = 'none';
-                idCplSelect.disabled = false;
-                idCplSelect.required = true;
-                idCplSelect.name = 'id_cpl'; // Ensure select has name for create
-                idCplHidden.name = ''; // Remove name from hidden input
+                applySelectedCpmkData();
             } else if (mode === 'edit') {
                 const checkboxes = document.querySelectorAll('.row-checkbox:checked');
                 if (checkboxes.length !== 1) {
@@ -311,25 +320,19 @@
                         document.getElementById('formMethod').value = 'PUT';
                         document.getElementById('formDeskCpmkOld').value = data.desk_cpmk;
 
-                        // Set CPL values but make them readonly
-                        idCplSelect.value = data.id_cpl;
-                        idCplHidden.value = data.id_cpl; // Store in hidden input for form submission
-                        document.getElementById('desk_cpl').value = data.desk_cpl;
-
-                        // Show display input, hide select for edit mode
-                        idCplSelect.style.display = 'none';
-                        idCplDisplay.style.display = 'block';
-                        idCplDisplay.value = data.id_cpl;
-
-                        // Make CPL select disabled and remove name, use hidden input instead
-                        idCplSelect.disabled = true;
-                        idCplSelect.required = false;
-                        idCplSelect.name = ''; // Remove name from select
-                        idCplHidden.name = 'id_cpl'; // Set name on hidden input
-
-                        // Set CPMK values (editable)
-                        document.getElementById('id_cpmk').value = data.id_cpmk;
-                        document.getElementById('desk_cpmk').value = data.desk_cpmk;
+                        const hasOption = Array.from(sourceSelect.options).some(option => option.value === data.desk_cpmk);
+                        if (!hasOption && data.desk_cpmk) {
+                            const fallbackOption = document.createElement('option');
+                            fallbackOption.value = data.desk_cpmk;
+                            fallbackOption.textContent = `${data.id_cpmk} - ${data.desk_cpmk}`;
+                            fallbackOption.setAttribute('data-id-cpl', data.id_cpl);
+                            fallbackOption.setAttribute('data-desk-cpl', data.desk_cpl);
+                            fallbackOption.setAttribute('data-id-cpmk', data.id_cpmk);
+                            fallbackOption.setAttribute('data-desk-cpmk', data.desk_cpmk);
+                            sourceSelect.appendChild(fallbackOption);
+                        }
+                        sourceSelect.value = data.desk_cpmk;
+                        applySelectedCpmkData();
                         document.getElementById('id_mk').value = data.id_mk;
 
                         modal.style.display = 'block';
@@ -454,6 +457,27 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('click', function (event) {
+            const dropdown = event.target.closest('.user-dropdown');
+            document.querySelectorAll('.user-dropdown.is-open').forEach(function (item) {
+                if (item !== dropdown) {
+                    item.classList.remove('is-open');
+                }
+            });
+
+            if (!dropdown) {
+                return;
+            }
+
+            const toggle = event.target.closest('.user-dropdown-toggle');
+            if (toggle) {
+                event.preventDefault();
+                dropdown.classList.toggle('is-open');
+            }
+        });
+    </script>
+    <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
 

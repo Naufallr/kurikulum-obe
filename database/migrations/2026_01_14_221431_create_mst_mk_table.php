@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('mst_mk', function (Blueprint $table) {
             $table->string('id',10);
             $table->string('nama_mk',255)->primary();
+            $table->integer('sks',10);
             $table->string('jenis_mk',255);
             $table->string('status',30);
+            $table->integer('tahun',10);
+            $table->unsignedTinyInteger('semester');
             $table->timestamp('created_at');
             $table->timestamp('updated_at');
         });

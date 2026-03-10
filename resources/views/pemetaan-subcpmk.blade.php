@@ -7,6 +7,7 @@
     <title>Pemetaan Sub-CPMK - Kurikulum UKRI</title>
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/blade-animations.css') }}">
 </head>
 <body>
     <!-- Top Header Bar -->
@@ -18,17 +19,23 @@
             </div>
         </div>
         <div class="header-right">
-            <button class="btn-keluar">Keluar</button>
-            <div class="user-info user-info--header">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="user-details">
-                    <div class="user-name">Naufal Maulana</div>
-                    <div class="user-id">20231320044</div>
-                </div>
-                <div class="user-settings">
-                    <i class="fas fa-cog"></i>
+            <div class="user-dropdown">
+                <button type="button" class="user-info user-info--header user-dropdown-toggle">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">{{ auth()->user()->name ?? 'User' }}</div>
+                    </div>
+                    <div class="user-chevron">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </button>
+                <div class="user-dropdown-menu">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="user-dropdown-item">Keluar</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -46,20 +53,20 @@
                 <div class="nav-divider"></div>
                 <a href="{{route('mata-kuliah.index')}}" class="nav-item">Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
+                <a href="{{ route('capaian-pembelajaran-mata-kuliah.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
                 <div class="nav-divider"></div>
-                <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item active">Sub-CPMK</a>
+                <a href="{{ route('sub-cpmk.index') }}" class="nav-item">Sub-CPMK</a>
                 <div class="nav-divider"></div>
                 <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Penilaian</span>
-                    <i class="fas fa-chevron-down"></i>
+                    <i class="fas fa-chevron-right"></i>
                 </a>
-                <div class="submenu active">
+                <div class="submenu">
                     <a href="{{route('tahap-mekanisme-penilaian.index')}}" class="nav-item submenu-item">Teknik Penilaian</a>
                     <a href="{{route('bobot-penilaian.index')}}" class="nav-item submenu-item">Bobot Penilaian</a>
                 </div>
                 <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible active-submenu" onclick="toggleSubmenu(event)">
+                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
                     <span>Pemetaan</span>
                     <i class="fas fa-chevron-down"></i>
                 </a>
@@ -72,7 +79,7 @@
                     <a href="{{ route('organisasi-mata-kuliah.index') }}" class="nav-item submenu-item">Organisasi Mata Kuliah (OMK)</a>
                     <a href="{{ route('peta-pemenuhan-cpl.index') }}" class="nav-item submenu-item">Peta Pemenuhan CPL</a>
                     <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item submenu-item">Pemetaan CPL-CPMK-MK</a>
-                    <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item submenu-item">Pemetaan MK-CPMK-SubCPMK</a>
+                    <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item submenu-item active">Pemetaan MK-CPMK-SubCPMK</a>
                 </div>
             </nav>
 </aside>
@@ -127,6 +134,8 @@
                         @php
                             // Group: MK -> CPL -> CPMK
                             $groupedByMk = $data->groupBy('id_mk');
+                            $mkNameMap = $mks->pluck('nama_mk', 'id');
+                            $cplDeskMap = $cpls->pluck('desk', 'id');
                         @endphp
 
                         @forelse($groupedByMk as $mkId => $mkItems)
@@ -157,22 +166,35 @@
                                             </td>
 
                                             @if(!$mkFirstRowPrinted)
-                                                <td rowspan="{{ $mkRowspan }}">{{ $mkId }}</td>
+                                                <td rowspan="{{ $mkRowspan }}">
+                                                    <span>{{ $mkId }}</span>
+                                                    <i class="fas fa-eye" title="{{ $mkNameMap[$mkId] ?? '-' }}" style="margin-left: 4px; font-size: 11px; cursor: help;"></i>
+                                                </td>
                                                 @php $mkFirstRowPrinted = true; @endphp
                                             @endif
 
                                             @if(!$cplFirstRowPrinted)
-                                                <td rowspan="{{ $cplRowspan }}">{{ $cplId }}</td>
+                                                <td rowspan="{{ $cplRowspan }}">
+                                                    <span>{{ $cplId }}</span>
+                                                    <i class="fas fa-eye" title="{{ $cplDeskMap[$cplId] ?? '-' }}" style="margin-left: 4px; font-size: 11px; cursor: help;"></i>
+                                                </td>
                                                 @php $cplFirstRowPrinted = true; @endphp
                                             @endif
 
                                             @if(!$cpmkFirstRowPrinted)
-                                                <td rowspan="{{ $cpmkRowspan }}">{{ $cpmkId }}</td>
+                                                <td rowspan="{{ $cpmkRowspan }}">
+                                                    <span>{{ $cpmkId }}</span>
+                                                    <i class="fas fa-eye" title="{{ $cpmkFirst->desk_cpmk }}" style="margin-left: 4px; font-size: 11px; cursor: help;"></i>
+                                                </td>
                                                 <td rowspan="{{ $cpmkRowspan }}">{{ $cpmkFirst->desk_cpmk }}</td>
                                                 @php $cpmkFirstRowPrinted = true; @endphp
                                             @endif
 
-                                            <td>{{ $row->sub_cpmk }} : {{ $row->desk_subcpmk }}</td>
+                                            <td>
+                                                <span>{{ $row->sub_cpmk }}</span>
+                                                <i class="fas fa-eye" title="{{ $row->desk_subcpmk }}" style="margin-left: 4px; font-size: 11px; cursor: help;"></i>
+                                                : {{ $row->desk_subcpmk }}
+                                            </td>
                                         </tr>
                                     @endforeach
                                 @endforeach
@@ -203,6 +225,43 @@
                 <input type="hidden" name="desk_subcpmk_old" id="deskSubcpmkOld">
 
                 <div class="form-group-modal">
+                    <label for="source_id_subcpmk">Pilih Sub-CPMK <span class="required">*</span></label>
+                    <select id="source_id_subcpmk" name="source_id_subcpmk" class="form-input-modal" required onchange="applySelectedSubcpmkData()">
+                        <option value="">Pilih Sub-CPMK</option>
+                        @foreach($subcpmkMaster as $sub)
+                            <option
+                                value="{{ $sub->id_subcpmk }}"
+                                data-id-cpl="{{ $sub->id_cpl }}"
+                                data-id-cpmk="{{ $sub->id_cpmk }}"
+                                data-desk-cpmk="{{ $sub->desk_cpmk }}"
+                                data-desk-subcpmk="{{ $sub->desk_subcpmk }}">
+                                {{ $sub->id_subcpmk }} - {{ \Illuminate\Support\Str::limit($sub->desk_subcpmk, 70) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="form-group-modal">
+                    <label for="id_cpl_display">CPL</label>
+                    <input type="text" id="id_cpl_display" class="form-input-modal" readonly>
+                </div>
+
+                <div class="form-group-modal">
+                    <label for="id_cpmk_display">CPMK</label>
+                    <input type="text" id="id_cpmk_display" class="form-input-modal" readonly>
+                </div>
+
+                <div class="form-group-modal">
+                    <label for="desk_cpmk_display">Deskripsi CPMK</label>
+                    <textarea id="desk_cpmk_display" class="form-input-modal" rows="3" readonly></textarea>
+                </div>
+
+                <div class="form-group-modal">
+                    <label for="desk_subcpmk_display">Deskripsi Sub-CPMK</label>
+                    <textarea id="desk_subcpmk_display" class="form-input-modal" rows="3" readonly></textarea>
+                </div>
+
+                <div class="form-group-modal">
                     <label for="id_mk">MK <span class="required">*</span></label>
                     <select id="id_mk" name="id_mk" class="form-input-modal" required>
                         <option value="">Pilih Mata Kuliah</option>
@@ -210,42 +269,6 @@
                             <option value="{{ $mk->id }}">{{ $mk->id }} - {{ $mk->nama_mk }}</option>
                         @endforeach
                     </select>
-                </div>
-
-                <div class="form-group-modal">
-                    <label for="id_cpl">CPL <span class="required">*</span></label>
-                    <input type="text" id="id_cpl" name="id_cpl" class="form-input-modal" readonly required>
-                </div>
-
-                <div class="form-group-modal">
-                    <label for="id_cpmk">CPMK <span class="required">*</span></label>
-                    <select id="id_cpmk" name="id_cpmk" class="form-input-modal" required onchange="updateCpmkFields()">
-                        <option value="">Pilih CPMK</option>
-                        @foreach($cpmks as $cpmk)
-                            <option value="{{ $cpmk->id_cpmk }}"
-                                data-id-mk="{{ $cpmk->id_mk }}"
-                                data-id-cpl="{{ $cpmk->id_cpl }}"
-                                data-desk-cpmk="{{ $cpmk->desk_cpmk }}">
-                                {{ $cpmk->id_cpmk }} - {{ $cpmk->id_mk }} / {{ $cpmk->id_cpl }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <small style="display:block;margin-top:6px;color:#666;">Pilih CPMK untuk mengisi CPL & Deskripsi CPMK otomatis.</small>
-                </div>
-
-                <div class="form-group-modal">
-                    <label for="desk_cpmk">Deskripsi CPMK <span class="required">*</span></label>
-                    <textarea id="desk_cpmk" name="desk_cpmk" class="form-input-modal" rows="3" readonly required></textarea>
-                </div>
-
-                <div class="form-group-modal">
-                    <label for="sub_cpmk">Sub-CPMK <span class="required">*</span></label>
-                    <input type="text" id="sub_cpmk" name="sub_cpmk" class="form-input-modal" required placeholder="Contoh: Sub-CPMK0111">
-                </div>
-
-                <div class="form-group-modal">
-                    <label for="desk_subcpmk">Deskripsi Sub-CPMK <span class="required">*</span></label>
-                    <textarea id="desk_subcpmk" name="desk_subcpmk" class="form-input-modal" rows="3" required></textarea>
                 </div>
 
                 <div class="modal-footer">
@@ -291,47 +314,43 @@
             }
         }
 
-        // CPMK selection -> fill CPL + deskripsi CPMK
-        function updateCpmkFields() {
-            const idMk = document.getElementById('id_mk').value;
-            const select = document.getElementById('id_cpmk');
-            const opt = select.options[select.selectedIndex];
-            const idCplInput = document.getElementById('id_cpl');
-            const deskCpmkInput = document.getElementById('desk_cpmk');
-
-            if (!opt || !opt.value) {
-                idCplInput.value = '';
-                deskCpmkInput.value = '';
-                return;
-            }
-
-            // Optional: warning jika CPMK tidak sesuai MK yang dipilih
-            const optMk = opt.getAttribute('data-id-mk') || '';
-            if (idMk && optMk && idMk !== optMk) {
-                // tetap isi field tapi inform user
-                console.warn('CPMK yang dipilih tidak sesuai dengan MK yang sedang dipilih.');
-            }
-
-            idCplInput.value = opt.getAttribute('data-id-cpl') || '';
-            deskCpmkInput.value = opt.getAttribute('data-desk-cpmk') || '';
-        }
-
         // Modal functions
         const modal = document.getElementById('modalForm');
 
+        function applySelectedSubcpmkData() {
+            const select = document.getElementById('source_id_subcpmk');
+            const selected = select.options[select.selectedIndex];
+
+            const idCpl = document.getElementById('id_cpl_display');
+            const idCpmk = document.getElementById('id_cpmk_display');
+            const deskCpmk = document.getElementById('desk_cpmk_display');
+            const deskSubcpmk = document.getElementById('desk_subcpmk_display');
+
+            if (!selected || !selected.value) {
+                idCpl.value = '';
+                idCpmk.value = '';
+                deskCpmk.value = '';
+                deskSubcpmk.value = '';
+                return;
+            }
+
+            idCpl.value = selected.getAttribute('data-id-cpl') || '';
+            idCpmk.value = selected.getAttribute('data-id-cpmk') || '';
+            deskCpmk.value = selected.getAttribute('data-desk-cpmk') || '';
+            deskSubcpmk.value = selected.getAttribute('data-desk-subcpmk') || '';
+        }
+
         function openModal(mode) {
+            const sourceSelect = document.getElementById('source_id_subcpmk');
+
             if (mode === 'create') {
                 document.getElementById('modalTitle').textContent = 'Tambah Data';
                 document.getElementById('formData').action = '{{ route("pemetaan-subcpmk.store") }}';
                 document.getElementById('formMethod').value = 'POST';
                 document.getElementById('formData').reset();
                 document.getElementById('deskSubcpmkOld').value = '';
-
-                // enable selects
                 document.getElementById('id_mk').disabled = false;
-                document.getElementById('id_cpmk').disabled = false;
-                document.getElementById('sub_cpmk').readOnly = false;
-                document.getElementById('desk_subcpmk').readOnly = false;
+                applySelectedSubcpmkData();
 
                 modal.style.display = 'block';
                 return;
@@ -353,18 +372,22 @@
                     document.getElementById('formMethod').value = 'PUT';
                     document.getElementById('deskSubcpmkOld').value = data.desk_subcpmk;
 
-                    document.getElementById('id_mk').value = data.id_mk;
-                    document.getElementById('id_cpl').value = data.id_cpl;
-                    document.getElementById('id_cpmk').value = data.id_cpmk;
-                    document.getElementById('desk_cpmk').value = data.desk_cpmk;
-                    document.getElementById('sub_cpmk').value = data.sub_cpmk;
-                    document.getElementById('desk_subcpmk').value = data.desk_subcpmk;
+                    const hasOption = Array.from(sourceSelect.options).some(opt => opt.value === data.sub_cpmk);
+                    if (!hasOption && data.sub_cpmk) {
+                        const fallbackOption = document.createElement('option');
+                        fallbackOption.value = data.sub_cpmk;
+                        fallbackOption.textContent = `${data.sub_cpmk} - ${data.desk_subcpmk}`;
+                        fallbackOption.setAttribute('data-id-cpl', data.id_cpl || '');
+                        fallbackOption.setAttribute('data-id-cpmk', data.id_cpmk || '');
+                        fallbackOption.setAttribute('data-desk-cpmk', data.desk_cpmk || '');
+                        fallbackOption.setAttribute('data-desk-subcpmk', data.desk_subcpmk || '');
+                        sourceSelect.appendChild(fallbackOption);
+                    }
 
-                    // make MK/CPMK readonly in edit (sesuai request: edit per sub-cpmk, bukan pindah mapping)
-                    document.getElementById('id_mk').disabled = true;
-                    document.getElementById('id_cpmk').disabled = true;
-                    document.getElementById('sub_cpmk').readOnly = false;
-                    document.getElementById('desk_subcpmk').readOnly = false;
+                    sourceSelect.value = data.sub_cpmk || '';
+                    applySelectedSubcpmkData();
+                    document.getElementById('id_mk').value = data.id_mk;
+                    document.getElementById('id_mk').disabled = false;
 
                     modal.style.display = 'block';
                 })
@@ -482,6 +505,27 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('click', function (event) {
+            const dropdown = event.target.closest('.user-dropdown');
+            document.querySelectorAll('.user-dropdown.is-open').forEach(function (item) {
+                if (item !== dropdown) {
+                    item.classList.remove('is-open');
+                }
+            });
+
+            if (!dropdown) {
+                return;
+            }
+
+            const toggle = event.target.closest('.user-dropdown-toggle');
+            if (toggle) {
+                event.preventDefault();
+                dropdown.classList.toggle('is-open');
+            }
+        });
+    </script>
+    <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
 

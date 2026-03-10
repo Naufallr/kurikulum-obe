@@ -19,12 +19,14 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
 
         $admin = User::firstOrCreate(
-            ['name' => 'admin', 'password' => Hash::make('12345')]
+            ['name' => 'admin'],
+            ['password' => Hash::make('12345')]
         );
         $admin->assignRole('admin');
 
         $user = User::firstOrCreate(
-            ['name' => 'user', 'password' => Hash::make('12345')]
+            ['name' => 'user'],
+            ['password' => Hash::make('12345')]
         );
         $user->assignRole('user');
     }

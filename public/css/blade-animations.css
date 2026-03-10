@@ -1,0 +1,39 @@
+:root {
+    --anim-duration-fast: 260ms;
+    --anim-duration: 520ms;
+    --anim-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+    opacity: 0;
+    transition: opacity var(--anim-duration-fast) ease;
+}
+
+body.page-ready {
+    opacity: 1;
+}
+
+.anim-enter {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity var(--anim-duration) var(--anim-ease), transform var(--anim-duration) var(--anim-ease);
+    transition-delay: var(--anim-delay, 0ms);
+}
+
+.anim-enter.anim-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body {
+        opacity: 1;
+        transition: none;
+    }
+
+    .anim-enter {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
