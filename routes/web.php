@@ -19,6 +19,9 @@ use App\Http\Controllers\PemetaanSubcpmkController;
 use App\Http\Controllers\SubCpmkController;
 use App\Http\Controllers\TahapMekanismeController;
 use App\Http\Controllers\BobotPenilaianController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\ChatbotController;
 
 Route::get('/landing', function () {
     return view('landing');
@@ -27,12 +30,18 @@ Route::get('/landing', function () {
 Route::match(['get', 'post'], '/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/dashboard', [ProfileLulusanController::class, 'index'])->name('dashboard');
-Route::post('/dashboard', [ProfileLulusanController::class, 'store'])->name('mst_pl.store');
-Route::get('/dashboard/{profileLulusan}', [ProfileLulusanController::class, 'show'])->name('mst_pl.show');
-Route::put('/dashboard/{profileLulusan}', [ProfileLulusanController::class, 'update'])->name('mst_pl.update');
-Route::delete('/dashboard/{profileLulusan}', [ProfileLulusanController::class, 'destroy'])->name('mst_pl.destroy');
-Route::post('/dashboard/delete-multiple', [ProfileLulusanController::class, 'destroyMultiple'])->name('mst_pl.destroy-multiple');
+Route::get('/dashboard', [ProfileController::class, 'index'])->name('dashboard');
+Route::put('/dashboard', [ProfileController::class, 'update'])->name('dashboard.update');
+Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
+Route::post('/admin/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+Route::put('/admin/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+
+Route::get('/profile-lulusan', [ProfileLulusanController::class, 'index'])->name('profile-lulusan');
+Route::post('/profile-lulusan', [ProfileLulusanController::class, 'store'])->name('mst_pl.store');
+Route::get('/profile-lulusan/{profileLulusan}', [ProfileLulusanController::class, 'show'])->name('mst_pl.show');
+Route::put('/profile-lulusan/{profileLulusan}', [ProfileLulusanController::class, 'update'])->name('mst_pl.update');
+Route::delete('/profile-lulusan/{profileLulusan}', [ProfileLulusanController::class, 'destroy'])->name('mst_pl.destroy');
+Route::post('/profile-lulusan/delete-multiple', [ProfileLulusanController::class, 'destroyMultiple'])->name('mst_pl.destroy-multiple');
 
 Route::get('/capaian-lulusan-prodi', [CapaianLulusanProdiController::class, 'index'])->name('capaian-lulusan-prodi.index');
 Route::post('/capaian-lulusan-prodi', [CapaianLulusanProdiController::class, 'store'])->name('capaian-lulusan-prodi.store');
@@ -109,3 +118,7 @@ Route::get('/bobot-penilaian/get-data/{bobotPenilaian}', [BobotPenilaianControll
 Route::put('/bobot-penilaian/{bobotPenilaian}', [BobotPenilaianController::class, 'update'])->name('bobot-penilaian.update');
 Route::delete('/bobot-penilaian/{bobotPenilaian}', [BobotPenilaianController::class, 'destroy'])->name('bobot-penilaian.destroy');
 Route::post('/bobot-penilaian/delete-multiple', [BobotPenilaianController::class, 'destroyMultiple'])->name('bobot-penilaian.destroy-multiple');
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('/chatbot/chat', [ChatbotController::class, 'chat'])->name('chatbot.chat');
+});
