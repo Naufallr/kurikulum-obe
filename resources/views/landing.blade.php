@@ -89,7 +89,7 @@
     <section id="galeri" class="gallery">
         <div class="gallery-head">
             <h3>Galeri Kampus</h3>
-            <p>Geser ke kanan untuk melihat lebih banyak kegiatan dan fasilitas.</p>
+            <br>
         </div>
         <div class="scroll-row" aria-label="Galeri kampus dengan scrollbar horizontal">
             <article class="gallery-card">
@@ -130,6 +130,8 @@
         </div>
     </section>
 
+    @include('partials.page-footer', ['footerClass' => 'page-footer--public'])
+
     <script>
         const slider = document.querySelector('.hero-slider');
         if (slider) {
@@ -153,12 +155,3 @@
     <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-

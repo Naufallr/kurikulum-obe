@@ -314,6 +314,8 @@ body {
 .main-content {
     margin-left: 250px;
     flex: 1;
+    display: flex;
+    flex-direction: column;
     padding: 30px;
     background-color: #ffffff;
     overflow-y: auto;
@@ -390,6 +392,22 @@ body {
 .btn-action:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.btn-table-edit {
+    background-color: #FFC107;
+    color: #333;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.btn-table-edit:hover {
+    background-color: #e0a800;
 }
 
 .btn-tambah {
@@ -471,6 +489,10 @@ body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
+.modal-content--wide {
+    max-width: 900px;
+}
+
 .modal-header {
     background-color: #A50000;
     color: white;
@@ -506,12 +528,32 @@ body {
     margin-bottom: 20px;
 }
 
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 20px;
+}
+
+.form-group-modal--full {
+    grid-column: 1 / -1;
+}
+
 .form-group-modal label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
     color: #333;
     font-size: 14px;
+}
+
+.form-hint {
+    margin-top: 6px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.password-field {
+    position: relative;
 }
 
 .required {
@@ -525,6 +567,27 @@ body {
     border-radius: 6px;
     font-size: 14px;
     transition: border-color 0.3s;
+}
+
+.form-input-modal--password {
+    padding-right: 44px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+}
+
+.password-toggle:hover {
+    color: #A50000;
 }
 
 .form-input-modal:focus {
@@ -637,6 +700,15 @@ input[type="checkbox"] {
     .content-title {
         font-size: 20px;
     }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .modal-content--wide {
+        width: 95%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -661,4 +733,31 @@ input[type="checkbox"] {
         width: 100%;
         justify-content: center;
     }
+}
+
+/* Footer */
+.profile-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+
+.page-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    color: #5d6067;
+    font-size: 14px;
+}
+
+.footer-section {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.page-footer p {
+    margin: 0;
+    font-size: 16px;
 }

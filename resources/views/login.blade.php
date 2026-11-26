@@ -47,10 +47,12 @@
                 <button type="submit" class="login-button">Masuk</button>
             </form>
         </div>
+        @include('partials.page-footer', ['footerClass' => 'page-footer--login'])
     </div>
     <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
+
 
 
 

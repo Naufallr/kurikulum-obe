@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard - Kurikulum UKRI</title>
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}?v={{ filemtime(public_path('css/dashboard.css')) }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/blade-animations.css') }}">
 </head>
@@ -46,48 +46,29 @@
         <!-- Left Sidebar -->
         <aside class="sidebar">
             <nav class="sidebar-nav">
-                <a href="{{ route('dashboard') }}" class="nav-item active">Profile Lulusan</a>
-                <div class="nav-divider"></div>
-                <a href="{{ route('capaian-lulusan-prodi.index') }}" class="nav-item">Capaian Pembelajaran Lulusan</a>
-                <div class="nav-divider"></div>
-                <a href="{{ route('bahan-kajian.index') }}" class="nav-item">Bahan Kajian</a>
-                <div class="nav-divider"></div>
-                <a href="{{route('mata-kuliah.index')}}" class="nav-item">Mata Kuliah</a>
-                <div class="nav-divider"></div>
-                <a href="{{ route('capaian-pembelajaran-mata-kuliah.index') }}" class="nav-item">Capaian Pembelajaran Mata Kuliah</a>
-                <div class="nav-divider"></div>
-                <a href="{{ route('sub-cpmk.index') }}" class="nav-item">Sub-CPMK</a>
-                <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
-                    <span>Penilaian</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <div class="submenu">
-                    <a href="{{route('tahap-mekanisme-penilaian.index')}}" class="nav-item submenu-item">Teknik Penilaian</a>
-                    <a href="{{route('bobot-penilaian.index')}}" class="nav-item submenu-item">Bobot Penilaian</a>
-                </div>
-                <div class="nav-divider"></div>
-                <a href="#" class="nav-item collapsible" onclick="toggleSubmenu(event)">
-                    <span>Pemetaan</span>
-                    <i class="fas fa-chevron-right"></i>
-                </a>
-                <div class="submenu">
-                    <a href="{{ route('pemetaan-cpl-pl.index') }}" class="nav-item submenu-item">CPL-PL</a>
-                    <a href="{{ route('pemetaan-cpl-bk.index') }}" class="nav-item submenu-item">CPL-BK</a>
-                    <a href="{{ route('pemetaan-bk-mk.index') }}" class="nav-item submenu-item">BK-MK</a>
-                    <a href="{{ route('pemetaan-cpl-mk.index') }}" class="nav-item submenu-item">CPL-MK</a>
-                    <a href="{{ route('pemetaan-cpl-bk-mk.index') }}" class="nav-item submenu-item">CPL-BK-MK</a>
-                    <a href="{{ route('organisasi-mata-kuliah.index') }}" class="nav-item submenu-item">Organisasi Mata Kuliah (OMK)</a>
-                    <a href="{{ route('peta-pemenuhan-cpl.index') }}" class="nav-item submenu-item">Peta Pemenuhan CPL</a>
-                    <a href="{{ route('pemetaan-cpl-cpmk-mk.index') }}" class="nav-item submenu-item">Pemetaan CPL-CPMK-MK</a>
-                    <a href="{{ route('pemetaan-subcpmk.index') }}" class="nav-item submenu-item">Pemetaan MK-CPMK-SubCPMK</a>
-                </div>
+                @include('partials.sidebar-nav')
             </nav>
         </aside>
 
         <!-- Main Content Area -->
-        <main class="main-content">
-            <h1 class="content-title">PROFILE LULUSAN</h1>
+        <main class="main-content profile-page">
+            @php
+                $currentUser = auth()->user();
+            @endphp
+
+            <h1 class="content-title">PROFILE PROGRAM STUDI</h1>
+
+            @php
+                $programProfile = [
+                    'Fakultas' => $currentUser->fakultas ?? '-',
+                    'Program Studi' => $currentUser->program_studi ?? '-',
+                    'Akreditasi' => $currentUser->akreditasi ?? '-',
+                    'Jenjang Pendidikan' => $currentUser->jenjang_pendidikan ?? '-',
+                    'Gelar Lulusan' => $currentUser->gelar_lulusan ?? '-',
+                    'Visi Keilmuan Program Studi' => $currentUser->visi_keilmuan_program_studi ?? '-',
+                    'Misi Program Studi' => $currentUser->misi_program_studi ?? '-',
+                ];
+            @endphp
 
             @if(session('success'))
                 <div class="alert alert-success">
@@ -97,6 +78,7 @@
 
             @if($errors->any())
                 <div class="alert alert-error">
+                    <strong>Data belum bisa disimpan.</strong>
                     <ul>
                         @foreach($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -106,98 +88,124 @@
             @endif
 
             <div class="action-buttons">
-                <button class="btn-action btn-tambah" onclick="openModal('create')">
-                    <i class="fas fa-plus"></i> Tambah
-                </button>
-                <button class="btn-action btn-edit" onclick="openModal('edit')" id="btnEdit" disabled>
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn-action btn-hapus" onclick="confirmDelete()" id="btnDelete" disabled>
-                    <i class="fas fa-trash"></i> Hapus
+                <button type="button" class="btn-action btn-edit" onclick="openDashboardModal()">
+                    <i class="fas fa-edit"></i> Edit Profile
                 </button>
             </div>
 
             <div class="table-container">
                 <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th width="50">
-                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
-                            </th>
-                            <th>NO</th>
-                            <th>ID</th>
-                            <th>PROFILE LULUSAN (PL)</th>
-                            <th>UNSUR</th>
-                            <th>KETERANGAN</th>
-                        </tr>
-                    </thead>
                     <tbody>
-                        @forelse($profileLulusan ?? [] as $index => $item)
-                        <tr>
-                            <td>
-                                <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="row-checkbox" onchange="updateButtons()">
-                            </td>
-                            <td>{{ $index + 1 }}</td>
-                            <td title="{{ $item->desk }}">{{ $item->id }}</td>
-                            <td>{{ $item->desk }}</td>
-                            <td>{{ $item->unsur ?? '-' }}</td>
-                            <td>{{ $item->keterangan ?? '-' }}</td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px;">
-                                <em>Tidak ada data</em>
-                            </td>
-                        </tr>
-                        @endforelse
+                        @foreach ($programProfile as $label => $value)
+                            <tr>
+                                <th style="width: 260px;">{{ $label }}</th>
+                                <td>{{ $value }}</td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
+
+            @include('partials.page-footer')
         </main>
     </div>
 
-    <!-- Modal Form -->
-    <div id="modalForm" class="modal">
-        <div class="modal-content">
+    <div id="dashboardModal" class="modal">
+        <div class="modal-content modal-content--wide">
             <div class="modal-header">
-                <h2 id="modalTitle">Tambah Data</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Edit Profile Program Studi</h2>
+                <span class="close" onclick="closeDashboardModal()">&times;</span>
             </div>
-            <form id="formData" method="POST">
+            <form method="POST" action="{{ route('dashboard.update') }}">
                 @csrf
-                <input type="hidden" name="_method" id="formMethod" value="POST">
-                <input type="hidden" name="id" id="formId">
+                @method('PUT')
 
-                <div class="form-group-modal">
-                    <label for="id">ID <span class="required">*</span></label>
-                    <input type="text" id="id" name="id" class="form-input-modal" required>
-                </div>
+                <div class="form-grid">
+                    <div class="form-group-modal">
+                        <label for="fakultas">Fakultas</label>
+                        <input
+                            type="text"
+                            id="fakultas"
+                            name="fakultas"
+                            class="form-input-modal"
+                            value="{{ old('fakultas', $currentUser->fakultas) }}"
+                        >
+                    </div>
 
-                <div class="form-group-modal">
-                    <label for="desk">PROFILE LULUSAN (PL) <span class="required">*</span></label>
-                    <input type="text" id="desk" name="desk" class="form-input-modal" required>
-                </div>
+                    <div class="form-group-modal">
+                        <label for="program_studi">Program Studi</label>
+                        <input
+                            type="text"
+                            id="program_studi"
+                            name="program_studi"
+                            class="form-input-modal"
+                            value="{{ old('program_studi', $currentUser->program_studi) }}"
+                        >
+                    </div>
 
-                <div class="form-group-modal">
-                    <label for="unsur">UNSUR</label>
-                    <input type="text" id="unsur" name="unsur" class="form-input-modal">
-                </div>
+                    <div class="form-group-modal">
+                        <label for="akreditasi">Akreditasi</label>
+                        <input
+                            type="text"
+                            id="akreditasi"
+                            name="akreditasi"
+                            class="form-input-modal"
+                            value="{{ old('akreditasi', $currentUser->akreditasi) }}"
+                        >
+                    </div>
 
-                <div class="form-group-modal">
-                    <label for="keterangan">KETERANGAN</label>
-                    <textarea id="keterangan" name="keterangan" class="form-input-modal" rows="3"></textarea>
+                    <div class="form-group-modal">
+                        <label for="jenjang_pendidikan">Jenjang Pendidikan</label>
+                        <input
+                            type="text"
+                            id="jenjang_pendidikan"
+                            name="jenjang_pendidikan"
+                            class="form-input-modal"
+                            value="{{ old('jenjang_pendidikan', $currentUser->jenjang_pendidikan) }}"
+                        >
+                    </div>
+
+                    <div class="form-group-modal form-group-modal--full">
+                        <label for="gelar_lulusan">Gelar Lulusan</label>
+                        <input
+                            type="text"
+                            id="gelar_lulusan"
+                            name="gelar_lulusan"
+                            class="form-input-modal"
+                            value="{{ old('gelar_lulusan', $currentUser->gelar_lulusan) }}"
+                        >
+                    </div>
+
+                    <div class="form-group-modal form-group-modal--full">
+                        <label for="visi_keilmuan_program_studi">Visi Keilmuan Program Studi</label>
+                        <textarea
+                            id="visi_keilmuan_program_studi"
+                            name="visi_keilmuan_program_studi"
+                            class="form-input-modal"
+                            rows="4"
+                        >{{ old('visi_keilmuan_program_studi', $currentUser->visi_keilmuan_program_studi) }}</textarea>
+                    </div>
+
+                    <div class="form-group-modal form-group-modal--full">
+                        <label for="misi_program_studi">Misi Program Studi</label>
+                        <textarea
+                            id="misi_program_studi"
+                            name="misi_program_studi"
+                            class="form-input-modal"
+                            rows="5"
+                        >{{ old('misi_program_studi', $currentUser->misi_program_studi) }}</textarea>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
-                    <button type="submit" class="btn-save">Simpan</button>
+                    <button type="button" class="btn-cancel" onclick="closeDashboardModal()">Batal</button>
+                    <button type="submit" class="btn-save">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Toggle submenu
         function toggleSubmenu(event) {
             event.preventDefault();
             const item = event.currentTarget;
@@ -230,187 +238,48 @@
                 }
             }
         }
+    </script>
+    <script>
+        const dashboardModal = document.getElementById('dashboardModal');
 
-        // Modal functions
-        const modal = document.getElementById('modalForm');
-        let selectedIds = [];
-
-        function openModal(mode) {
-            if (mode === 'create') {
-                document.getElementById('modalTitle').textContent = 'Tambah Data';
-                document.getElementById('formData').action = '{{ route("mst_pl.store") }}';
-                document.getElementById('formMethod').value = 'POST';
-                document.getElementById('formData').reset();
-                document.getElementById('formId').value = '';
-            } else if (mode === 'edit') {
-                const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-                if (checkboxes.length !== 1) {
-                    alert('Pilih satu data untuk diedit!');
-                    return;
-                }
-                const id = checkboxes[0].value;
-                fetch(`/dashboard/${id}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('modalTitle').textContent = 'Edit Data';
-                        document.getElementById('formData').action = `/dashboard/${id}`;
-                        document.getElementById('formMethod').value = 'PUT';
-                        document.getElementById('formId').value = data.id;
-                        document.getElementById('id').value = data.id;
-                        document.getElementById('desk').value = data.desk;
-                        document.getElementById('unsur').value = data.unsur || '';
-                        document.getElementById('keterangan').value = data.keterangan || '';
-                        modal.style.display = 'block';
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Gagal memuat data!');
-                    });
-                return;
-            }
-            modal.style.display = 'block';
+        function openDashboardModal() {
+            dashboardModal.style.display = 'block';
         }
 
-        function closeModal() {
-            modal.style.display = 'none';
+        function closeDashboardModal() {
+            dashboardModal.style.display = 'none';
         }
 
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-
-        // Checkbox functions
-        function toggleSelectAll() {
-            const selectAll = document.getElementById('selectAll');
-            const checkboxes = document.querySelectorAll('.row-checkbox');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = selectAll.checked;
-            });
-            updateButtons();
-        }
-
-        function updateButtons() {
-            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-            const btnEdit = document.getElementById('btnEdit');
-            const btnDelete = document.getElementById('btnDelete');
-
-            if (checkboxes.length === 1) {
-                btnEdit.disabled = false;
-                btnDelete.disabled = false;
-            } else if (checkboxes.length > 1) {
-                btnEdit.disabled = true;
-                btnDelete.disabled = false;
-            } else {
-                btnEdit.disabled = true;
-                btnDelete.disabled = true;
-            }
-        }
-
-        // Delete function
-        function confirmDelete() {
-            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-            if (checkboxes.length === 0) {
-                alert('Pilih data yang akan dihapus!');
-                return;
-            }
-
-            if (!confirm(`Apakah Anda yakin ingin menghapus ${checkboxes.length} data?`)) {
-                return;
-            }
-
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = '{{ route("mst_pl.destroy-multiple") }}';
-
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_token';
-            csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
-            form.appendChild(csrfInput);
-
-            checkboxes.forEach(checkbox => {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'ids[]';
-                input.value = checkbox.value;
-                form.appendChild(input);
-            });
-
-            document.body.appendChild(form);
-            form.submit();
-        }
-
-        // Handle form submission for PUT method
-        document.getElementById('formData').addEventListener('submit', function(e) {
-            if (document.getElementById('formMethod').value === 'PUT') {
-                e.preventDefault();
-                const form = this;
-                const formData = new FormData(form);
-                const action = form.action;
-
-                // Create a new form for PUT request
-                const putForm = document.createElement('form');
-                putForm.method = 'POST';
-                putForm.action = action;
-
-                const methodInput = document.createElement('input');
-                methodInput.type = 'hidden';
-                methodInput.name = '_method';
-                methodInput.value = 'PUT';
-                putForm.appendChild(methodInput);
-
-                const csrfInput = document.createElement('input');
-                csrfInput.type = 'hidden';
-                csrfInput.name = '_token';
-                csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
-                putForm.appendChild(csrfInput);
-
-                for (let [key, value] of formData.entries()) {
-                    if (key !== '_method' && key !== '_token') {
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = key;
-                        input.value = value;
-                        putForm.appendChild(input);
-                    }
-                }
-
-                document.body.appendChild(putForm);
-                putForm.submit();
-            }
-        });
-    </script>\n<script>
-    document.addEventListener('click', function (event) {
-        const dropdown = event.target.closest('.user-dropdown');
-        document.querySelectorAll('.user-dropdown.is-open').forEach(function (item) {
-            if (item !== dropdown) {
-                item.classList.remove('is-open');
+        window.addEventListener('click', function (event) {
+            if (event.target === dashboardModal) {
+                closeDashboardModal();
             }
         });
 
-        if (!dropdown) {
-            return;
-        }
+        @if($errors->any())
+            openDashboardModal();
+        @endif
+    </script>
+    <script>
+        document.addEventListener('click', function (event) {
+            const dropdown = event.target.closest('.user-dropdown');
+            document.querySelectorAll('.user-dropdown.is-open').forEach(function (item) {
+                if (item !== dropdown) {
+                    item.classList.remove('is-open');
+                }
+            });
 
-        const toggle = event.target.closest('.user-dropdown-toggle');
-        if (toggle) {
-            event.preventDefault();
-            dropdown.classList.toggle('is-open');
-        }
-    });
-</script>
+            if (!dropdown) {
+                return;
+            }
+
+            const toggle = event.target.closest('.user-dropdown-toggle');
+            if (toggle) {
+                event.preventDefault();
+                dropdown.classList.toggle('is-open');
+            }
+        });
+    </script>
     <script src="{{ asset('js/blade-animations.js') }}" defer></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-

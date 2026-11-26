@@ -60,10 +60,6 @@ class RolePermissionSeeder extends Seeder
         $roleAdmin->syncPermissions(Permission::all());
 
         $roleUserPermissions = [
-            'create-user',
-            'edit-user',
-            'delete-user',
-            'read-user',
             'create-idpl',
             'create-deskpl',
             'delete-idpl',

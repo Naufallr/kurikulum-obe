@@ -14,7 +14,7 @@ class ProfileLulusanController extends Controller
     public function index()
     {
         $profileLulusan = ProfileLulusan::orderBy('id', 'asc')->get();
-        return view('dashboard', compact('profileLulusan'));
+        return view('profile-lulusan', compact('profileLulusan'));
     }
 
     /**
@@ -31,7 +31,7 @@ class ProfileLulusanController extends Controller
 
         ProfileLulusan::create($request->all());
 
-        return redirect()->route('dashboard')->with('success', 'Data berhasil ditambahkan!');
+        return redirect()->route('profile-lulusan')->with('success', 'Data berhasil ditambahkan!');
     }
 
     /**
@@ -56,7 +56,7 @@ class ProfileLulusanController extends Controller
 
         $profileLulusan->update($request->all());
 
-        return redirect()->route('dashboard')->with('success', 'Data berhasil diupdate!');
+        return redirect()->route('profile-lulusan')->with('success', 'Data berhasil diupdate!');
     }
 
     /**
@@ -66,13 +66,13 @@ class ProfileLulusanController extends Controller
     {
         try {
             $profileLulusan->delete();
-            return redirect()->route('dashboard')->with('success', 'Data berhasil dihapus!');
+            return redirect()->route('profile-lulusan')->with('success', 'Data berhasil dihapus!');
         } catch (QueryException $e) {
             if (str_contains($e->getMessage(), '23503') || str_contains($e->getMessage(), 'foreign key constraint')) {
-                return redirect()->route('dashboard')
+                return redirect()->route('profile-lulusan')
                     ->withErrors(['error' => 'Data tidak dapat dihapus karena masih digunakan di tabel lain (tbl_pl_cpl). Silakan hapus data yang terkait terlebih dahulu.']);
             }
-            return redirect()->route('dashboard')
+            return redirect()->route('profile-lulusan')
                 ->withErrors(['error' => 'Gagal menghapus data: ' . $e->getMessage()]);
         }
     }
@@ -89,13 +89,13 @@ class ProfileLulusanController extends Controller
 
         try {
             $deletedCount = ProfileLulusan::whereIn('id', $request->ids)->delete();
-            return redirect()->route('dashboard')->with('success', $deletedCount . ' data berhasil dihapus!');
+            return redirect()->route('profile-lulusan')->with('success', $deletedCount . ' data berhasil dihapus!');
         } catch (QueryException $e) {
             if (str_contains($e->getMessage(), '23503') || str_contains($e->getMessage(), 'foreign key constraint')) {
-                return redirect()->route('dashboard')
+                return redirect()->route('profile-lulusan')
                     ->withErrors(['error' => 'Beberapa data tidak dapat dihapus karena masih digunakan di tabel lain (tbl_pl_cpl). Silakan hapus data yang terkait terlebih dahulu.']);
             }
-            return redirect()->route('dashboard')
+            return redirect()->route('profile-lulusan')
                 ->withErrors(['error' => 'Gagal menghapus data: ' . $e->getMessage()]);
         }
     }

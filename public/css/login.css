@@ -201,3 +201,30 @@ body {
         height: 70px;
     }
 }
+
+.page-footer {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.page-footer--login {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 120;
+    padding: 14px 18px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.6));
+    border-top: none;
+}
+
+.page-footer--login .footer-section {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+}
+
+.page-footer--login p {
+    margin: 0;
+    font-size: 14px;
+}
